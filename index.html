@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="hi" class=""> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kharch Tracker Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(125deg, #d16ba5, #9a9ae1, #69bff8, #5ffbf1);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            transition: background-color 0.3s;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .form-input {
+            width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
+        }
+        .form-input:focus {
+            outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4);
+        }
+        .btn {
+            padding: 10px 20px; border-radius: 8px; font-weight: 600;
+            transition: all 0.2s; border: none; cursor: pointer;
+        }
+        .btn-primary { background-color: #8b5cf6; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-primary:hover { background-color: #7c3aed; transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.15); }
+        .btn-secondary { background-color: #ef4444; color: white; }
+        .btn-secondary:hover { background-color: #dc2626; }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 12px 24px; border-radius: 8px; color: white; font-weight: 500;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+        }
+        #toast.show { opacity: 1; visibility: visible; }
+        .toast-success { background-color: #10b981; }
+        .toast-error { background-color: #ef4444; }
+
+        /* Tabs */
+        .tab-btn {
+            padding: 10px 16px; font-size: 1rem; font-weight: 600; border: none; background: transparent;
+            cursor: pointer; color: #4b5563; border-bottom: 3px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .tab-btn.active { color: #8b5cf6; border-bottom-color: #8b5cf6; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .dark .tab-btn { color: #d1d5db; }
+        .dark .tab-btn.active { color: #a78bfa; border-bottom-color: #a78bfa; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .item-appear { animation: itemAppear 0.4s ease-out forwards; }
+        @keyframes itemAppear { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        /* Dark Mode Styles */
+        .dark body { background: #111827; }
+        .dark .bg-white { background-color: #1f2937; }
+        .dark .bg-white\/90 { background-color: rgba(31, 41, 55, 0.9); }
+        .dark .text-gray-800 { color: #f9fafb; }
+        .dark .text-gray-700 { color: #e5e7eb; }
+        .dark .text-gray-600 { color: #d1d5db; }
+        .dark .text-gray-500 { color: #9ca3af; }
+        .dark .border-gray-200 { border-color: #374151; }
+        .dark .form-input { background-color: #374151; border-color: #4b5563; color: #f9fafb; }
+        .dark .form-input::placeholder { color: #9ca3af; }
+        .dark .bg-gray-50 { background-color: #1f2937; }
+        .dark .bg-gray-100 { background-color: #374151; }
+        .dark .bg-violet-50 { background-color: #2c2144; }
+        .dark .border-violet-200 { border-color: #4c2b92; }
+        .dark .text-indigo-700 { color: #c7d2fe; }
+        .dark .bg-indigo-100 { background-color: #3730a3; }
+        .dark .bg-indigo-100:hover { background-color: #312e81; }
+
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-2 sm:p-4">
+
+    <div id="loader" class="text-center">
+        <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-white font-semibold">Loading App...</p>
+    </div>
+
+    <div id="auth-container" class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-2xl shadow-lg hidden">
+        <h1 class="text-3xl font-bold text-center text-gray-800">Kharch Tracker</h1>
+        <div id="auth-error" class="text-red-500 text-sm text-center font-medium"></div>
+        <form id="auth-form" class="space-y-4">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="username" class="form-input mt-1" required>
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <div class="relative">
+                    <input type="password" id="password" class="form-input mt-1 pr-10" required>
+                    <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700">
+                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.05 10.05 0 01-4.303 5.436" /></svg>
+                    </button>
+                </div>
+            </div>
+             <div class="flex items-center">
+                <input id="admin-checkbox" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500">
+                <label for="admin-checkbox" class="ml-2 block text-sm text-gray-900">Admin ke jaisa login karein</label>
+            </div>
+            <div id="auth-buttons" class="flex flex-col sm:flex-row gap-3 pt-2">
+                 <button type="submit" id="login-btn" class="btn btn-primary w-full">Login as User</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="dashboard-container" class="w-full max-w-4xl hidden bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg">
+        <div class="flex flex-wrap justify-between items-center p-4 sm:p-6 border-b border-gray-200">
+            <div>
+                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Dashboard</h1>
+                 <p id="user-display-name" class="text-sm text-gray-600 mt-1"></p>
+            </div>
+            <div class="flex items-center gap-4">
+                 <button id="theme-toggle-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                    <svg id="theme-sun-icon" class="h-6 w-6 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    <svg id="theme-moon-icon" class="h-6 w-6 hidden text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                 </button>
+                 <button id="logout-btn" class="btn btn-secondary text-sm sm:text-base">Logout</button>
+            </div>
+        </div>
+        
+        <div id="tabs" class="border-b border-gray-200 px-4 sm:px-6">
+            <nav class="flex space-x-2 sm:space-x-4 -mb-px overflow-x-auto" aria-label="Tabs">
+                <button class="tab-btn active" data-tab="add-expense-tab">Naya Kharch</button>
+                <button class="tab-btn" data-tab="history-tab">History</button>
+                <button class="tab-btn" data-tab="settle-tab">Hisab Kitab</button>
+                <button class="tab-btn" data-tab="stats-tab">Stats</button> <button id="admin-tab-btn" class="tab-btn hidden" data-tab="admin-tab">Admin Panel</button>
+            </nav>
+        </div>
+
+        <div class="p-4 sm:p-6">
+            <div id="add-expense-tab" class="tab-content active">
+                <div class="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-200">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Naya Kharch Add Karein</h2>
+                    <form id="expense-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="total-amount" class="block text-sm font-medium text-gray-600">Total Amount</label>
+                                <input type="number" id="total-amount" class="form-input mt-1" placeholder="e.g., 1000.50" required step="0.01">
+                            </div>
+                             <div>
+                                <label for="description" class="block text-sm font-medium text-gray-600">Description</label>
+                                <input type="text" id="description" class="form-input mt-1" placeholder="e.g., Dinner, Groceries" required>
+                            </div>
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-gray-600">Category</label>
+                                <select id="category" class="form-input mt-1" required>
+                                    <option value="Food">Food</option>
+                                    <option value="Travel">Travel</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Bills">Bills</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">Hisseydaar (Members)</h3>
+                            <div id="members-container" class="space-y-2"></div>
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                 <button type="button" id="add-member-btn" class="text-sm btn bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">Add Member</button>
+                                 <button type="button" id="split-equally-btn" class="text-sm btn bg-green-500 text-white hover:bg-green-600">Split Equally</button>
+                            </div>
+                             <div class="mt-3">
+                                <p class="text-xs text-gray-500 mb-1">Quick Add:</p>
+                                <div id="quick-add-container" class="flex flex-wrap gap-2">
+                                    </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">Save Kharch</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="history-tab" class="tab-content">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">Kharch History</h2>
+                    <input type="text" id="history-search" class="form-input sm:w-64" placeholder="Search by description, name...">
+                    <button id="download-csv-btn" class="btn bg-gray-700 text-white hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 w-full sm:w-auto">Download Report (CSV)</button>
+                </div>
+                <div id="expense-history" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                    </div>
+            </div>
+            
+            <div id="settle-tab" class="tab-content">
+                 <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-700">Hisab Kitab (Settlements)</h2>
+                    <button id="download-settlement-btn" class="btn bg-blue-600 text-white hover:bg-blue-700">Download Hisab (TXT)</button>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Summary</h3>
+                <div id="balances-summary-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    </div>
+
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Final Hisab</h3>
+                <div id="settlements-container" class="space-y-3">
+                    </div>
+            </div>
+
+            <div id="stats-tab" class="tab-content">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Statistics</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h3 class="font-semibold text-center text-gray-600 mb-3">Kharch by Category</h3>
+                        <canvas id="category-chart"></canvas>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h3 class="font-semibold text-center text-gray-600 mb-3">Total Paid by Each Person</h3>
+                        <canvas id="paid-by-chart"></canvas>
+                    </div>
+                </div>
+                <div id="stats-summary" class="mt-6 text-center"></div>
+            </div>
+
+            <div id="admin-tab" class="tab-content">
+                <div id="admin-panel" class="bg-violet-50 p-4 sm:p-6 rounded-xl border border-violet-200">
+                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Admin Panel</h2>
+                     <form id="add-user-form" class="space-y-4">
+                         <p class="text-sm text-gray-600">Naye users ke liye username aur password banayein.</p>
+                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                             <div>
+                                 <label for="new-full-name" class="block text-sm font-medium text-gray-600">Full Name</label>
+                                 <input type="text" id="new-full-name" class="form-input mt-1" required>
+                             </div>
+                             <div>
+                                 <label for="new-username" class="block text-sm font-medium text-gray-600">New Username</label>
+                                 <input type="text" id="new-username" class="form-input mt-1" required>
+                             </div>
+                             <div>
+                                 <label for="new-password" class="block text-sm font-medium text-gray-600">New Password</label>
+                                 <input type="password" id="new-password" class="form-input mt-1" required>
+                             </div>
+                         </div>
+                         <button type="submit" class="btn btn-primary w-full md:w-auto">Add User</button>
+                     </form>
+                     <div class="mt-6">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">Maujood Users</h3>
+                        <div id="user-list-container" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, addDoc, getDocs, Timestamp, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        // --- Firebase Initialization (YOUR PERSONAL CONFIG) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGdWYuD4oeKczwsjDfYckMm_sJu0uWP38",
+            authDomain: "kharch-tracker-79680.firebaseapp.com",
+            projectId: "kharch-tracker-79680",
+            storageBucket: "kharch-tracker-79680.appspot.com",
+            messagingSenderId: "599284399757",
+            appId: "1:599284399757:web:4918fec447c1f408b9ecc4",
+            measurementId: "G-JQM8G7X0YY"
+        };
+        const appId = 'kharch-tracker-shivshree';
+
+        // --- App Setup ---
+        let app, db, auth, userId;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } catch(e) {
+            console.error("Firebase initialization failed:", e);
+            document.getElementById('loader').innerText = "App could not be loaded. Please check console.";
+        }
+
+        const loader = document.getElementById('loader');
+        const authContainer = document.getElementById('auth-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const authError = document.getElementById('auth-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const membersContainer = document.getElementById('members-container');
+        const addMemberBtn = document.getElementById('add-member-btn');
+        const splitEquallyBtn = document.getElementById('split-equally-btn');
+        const expenseForm = document.getElementById('expense-form');
+        const expenseHistory = document.getElementById('expense-history');
+        const adminPanel = document.getElementById('admin-panel');
+        const addUserForm = document.getElementById('add-user-form');
+        const downloadCsvBtn = document.getElementById('download-csv-btn');
+        const toast = document.getElementById('toast');
+        const togglePasswordBtn = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        const usernameInput = document.getElementById('username');
+        const adminCheckbox = document.getElementById('admin-checkbox');
+        const eyeIcon = document.getElementById('eye-icon');
+        const eyeOffIcon = document.getElementById('eye-off-icon');
+        const userListContainer = document.getElementById('user-list-container');
+        const authForm = document.getElementById('auth-form');
+        const adminTabBtn = document.getElementById('admin-tab-btn');
+        const userDisplayName = document.getElementById('user-display-name');
+        const historySearchInput = document.getElementById('history-search');
+
+        let unsubscribeExpenses = null;
+        let unsubscribeUsers = null;
+        let allExpensesCache = []; // Cache for stats and search
+        let categoryChartInstance, paidByChartInstance;
+
+        // --- Toast Notifications ---
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = '';
+            toast.classList.add('show', type === 'success' ? 'toast-success' : 'toast-error');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+        
+        // --- App State Management ---
+        async function showDashboard() {
+            loader.classList.add('hidden');
+            authContainer.classList.add('hidden');
+            dashboardContainer.classList.remove('hidden');
+            dashboardContainer.classList.add('fade-in');
+
+            const userFullName = localStorage.getItem('kharchTrackerUserName');
+            userDisplayName.textContent = `Welcome, ${userFullName}!`;
+            
+            resetExpenseForm();
+            await fetchAndDisplayExpenses();
+
+            const loggedInUsername = localStorage.getItem('kharchTrackerUser');
+            if (loggedInUsername === 'Shivshree@2004') {
+                adminTabBtn.classList.remove('hidden');
+                fetchAndDisplayUsers();
+            } else {
+                adminTabBtn.classList.add('hidden');
+                if(unsubscribeUsers) unsubscribeUsers();
+            }
+            switchTab('add-expense-tab');
+            await setupQuickAddButtons();
+        }
+
+        function showAuthError(message) {
+            authError.textContent = message;
+            authError.classList.toggle('hidden', !message);
+        }
+        
+        function showLoginScreen() {
+            loader.classList.add('hidden');
+            dashboardContainer.classList.add('hidden');
+            authContainer.classList.remove('hidden');
+            authContainer.classList.add('fade-in');
+            localStorage.removeItem('kharchTrackerUser');
+            localStorage.removeItem('kharchTrackerUserName');
+            if(unsubscribeExpenses) unsubscribeExpenses();
+            if(unsubscribeUsers) unsubscribeUsers();
+            authForm.reset();
+            adminCheckbox.dispatchEvent(new Event('change'));
+        }
+
+        function resetExpenseForm() {
+            expenseForm.reset();
+            membersContainer.innerHTML = '';
+            const userFullName = localStorage.getItem('kharchTrackerUserName');
+            if (userFullName) {
+                addMember(userFullName);
+            }
+        }
+        
+        // --- Tab Logic ---
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        function switchTab(tabId) {
+             tabContents.forEach(content => {
+                content.classList.toggle('active', content.id === tabId);
+                if (content.id === tabId) content.classList.add('fade-in');
+                else content.classList.remove('fade-in');
+            });
+            tabButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.tab === tabId);
+            });
+        }
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                switchTab(tabId);
+                if (tabId === 'settle-tab') calculateAndDisplaySettlements();
+                if (tabId === 'stats-tab') generateStats(); // NEW: Generate stats on tab click
+            });
+        });
+
+        // --- Dark Mode Logic ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const sunIcon = document.getElementById('theme-sun-icon');
+        const moonIcon = document.getElementById('theme-moon-icon');
+        const userTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const themeCheck = () => {
+            if (userTheme === 'dark' || (!userTheme && systemTheme)) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            }
+        };
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            themeCheck();
+        });
+        themeCheck();
+
+        // --- Authentication Logic ---
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.classList.toggle('hidden', isPassword);
+            eyeOffIcon.classList.toggle('hidden', !isPassword);
+        });
+
+        adminCheckbox.addEventListener('change', () => {
+            const loginBtn = document.getElementById('login-btn');
+            if (adminCheckbox.checked) {
+                usernameInput.value = 'Shivshree@2004';
+                usernameInput.readOnly = true;
+                usernameInput.classList.add('bg-gray-100');
+                if (loginBtn) loginBtn.textContent = 'Login as Admin';
+            } else {
+                usernameInput.value = '';
+                usernameInput.readOnly = false;
+                usernameInput.classList.remove('bg-gray-100');
+                if (loginBtn) loginBtn.textContent = 'Login as User';
+            }
+        });
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+             if (!username || !password) {
+                showAuthError("Username aur password zaroori hai.");
+                return;
+            }
+            
+            if (username === "Shivshree@2004") {
+                if (password !== "Shiv@2004.") {
+                    showAuthError("Galat admin password.");
+                    return;
+                }
+                try {
+                    const userDocRef = doc(db, `/artifacts/${appId}/public/data/credentials`, username);
+                    const docSnap = await getDoc(userDocRef);
+                    if (!docSnap.exists()) {
+                        await setDoc(userDocRef, { password, name: "Shivshree Kumar" });
+                        showToast("Admin account successfully banaya gaya!", 'success');
+                    }
+                    localStorage.setItem('kharchTrackerUser', username);
+                    localStorage.setItem('kharchTrackerUserName', 'Shivshree Kumar');
+                    await showDashboard();
+                    return;
+                } catch (error) {
+                    console.error("Error with admin login: ", error);
+                    showAuthError("Admin login mein samasya aayi.");
+                    return;
+                }
+            }
+
+            try {
+                const userDocRef = doc(db, `/artifacts/${appId}/public/data/credentials`, username);
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists() && docSnap.data().password === password) {
+                    const userName = docSnap.data().name || username;
+                    localStorage.setItem('kharchTrackerUser', username);
+                    localStorage.setItem('kharchTrackerUserName', userName);
+                    showToast(`Welcome back, ${userName}!`, 'success');
+                    await showDashboard();
+                } else {
+                    showAuthError("Galat username ya password. Sirf admin naye user bana sakta hai.");
+                }
+            } catch (error) {
+                console.error("Error logging in: ", error);
+                showAuthError("Login karne mein samasya aayi.");
+            }
+        }
+        
+        authForm.addEventListener('submit', handleLogin);
+
+        // --- Admin Panel Logic ---
+        addUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newFullName = document.getElementById('new-full-name').value;
+            const newUsername = document.getElementById('new-username').value;
+            const newPassword = document.getElementById('new-password').value;
+            if (!newFullName || !newUsername || !newPassword) {
+                 showToast("Sabhi fields zaroori hain.", 'error');
+                 return;
+            }
+
+            try {
+                const userDocRef = doc(db, `/artifacts/${appId}/public/data/credentials`, newUsername);
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    showToast("Yeh username pehle se hai.", 'error');
+                    return;
+                }
+                await setDoc(userDocRef, { name: newFullName, password: newPassword });
+                showToast("User successfully ban gaya!", 'success');
+                addUserForm.reset();
+            } catch (error) {
+                console.error("Error adding user: ", error);
+                showToast("User banane mein samasya aayi.", 'error');
+            }
+        });
+        
+        function fetchAndDisplayUsers() {
+            if(unsubscribeUsers) unsubscribeUsers();
+            const userCredsPath = `/artifacts/${appId}/public/data/credentials`;
+            const q = query(collection(db, userCredsPath));
+            
+            unsubscribeUsers = onSnapshot(q, (snapshot) => {
+                userListContainer.innerHTML = '';
+                const userDocs = snapshot.docs;
+                if(userDocs.length <= 1) { // Only admin exists
+                    userListContainer.innerHTML = `<p class="text-center text-sm text-gray-500">Aapne abhi tak koi user nahi banaya hai.</p>`;
+                } else {
+                    userDocs.forEach(docSnap => {
+                        const username = docSnap.id;
+                        const userData = docSnap.data();
+                        if (username === 'Shivshree@2004') return;
+
+                        const userCard = document.createElement('div');
+                        userCard.className = 'bg-white p-3 rounded-lg border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 item-appear';
+                        userCard.innerHTML = `
+                            <div>
+                                <p class="font-semibold text-gray-800">${userData.name}</p>
+                                <p class="text-sm text-gray-500">Username: ${username}</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <p class="text-sm text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded">Pass: ${userData.password}</p>
+                                <button data-username="${username}" class="delete-user-btn btn btn-secondary text-xs px-3 py-1">Remove</button>
+                            </div>
+                        `;
+                        userListContainer.appendChild(userCard);
+                    });
+                }
+            }, (error) => {
+                console.error("Error fetching users:", error);
+                userListContainer.innerHTML = `<p class="text-center text-sm text-red-500">Users load karne mein samasya aayi.</p>`;
+            });
+        }
+        
+        async function deleteUser(username) {
+            if(confirm(`Kya aap "${username}" ko remove karna chahte hain?`)) {
+                try {
+                    const userDocRef = doc(db, `/artifacts/${appId}/public/data/credentials`, username);
+                    await deleteDoc(userDocRef);
+                    showToast(`User '${username}' remove ho gaya.`, 'success');
+                } catch (error) {
+                    console.error("Error removing user:", error);
+                    showToast("User remove karne mein samasya aayi.", 'error');
+                }
+            }
+        }
+        
+        userListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-user-btn')) {
+                const usernameToDelete = e.target.dataset.username;
+                if (usernameToDelete) {
+                    deleteUser(usernameToDelete);
+                }
+            }
+        });
+
+        // --- Expense Logic ---
+        async function setupQuickAddButtons() {
+            const quickAddContainer = document.getElementById('quick-add-container');
+            const loggedInUsername = localStorage.getItem('kharchTrackerUser');
+            quickAddContainer.innerHTML = ''; 
+
+            try {
+                const userCredsPath = `/artifacts/${appId}/public/data/credentials`;
+                const q = query(collection(db, userCredsPath));
+                const snapshot = await getDocs(q);
+
+                snapshot.forEach(doc => {
+                    const username = doc.id;
+                    const userData = doc.data();
+
+                    if (username !== loggedInUsername) {
+                         const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'quick-add-btn text-sm btn bg-indigo-100 text-indigo-700 hover:bg-indigo-200';
+                        button.dataset.name = userData.name;
+                        button.textContent = userData.name.split(' ')[0];
+                        
+                        button.addEventListener('click', () => {
+                            const name = button.dataset.name;
+                            const existingMembers = Array.from(membersContainer.querySelectorAll('input[type="text"]')).map(input => input.value);
+                            if (!existingMembers.includes(name)) {
+                                addMember(name);
+                            } else {
+                                showToast(`${name} pehle se added hai.`, 'error');
+                            }
+                        });
+                        quickAddContainer.appendChild(button);
+                    }
+                });
+            } catch (error) {
+                console.error("Quick Add buttons load karne mein samasya aayi:", error);
+            }
+        }
+
+        function addMember(name = '', amount = '') {
+            const memberDiv = document.createElement('div');
+            memberDiv.className = 'flex items-center gap-2 member-row';
+            memberDiv.innerHTML = `
+                <input type="text" value="${name}" class="form-input flex-grow" placeholder="Member ka naam" required>
+                <input type="number" value="${amount}" class="form-input w-28" placeholder="Amount" required step="0.01">
+                <button type="button" class="remove-member-btn text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>
+            `;
+            membersContainer.appendChild(memberDiv);
+            memberDiv.querySelector('.remove-member-btn').addEventListener('click', () => {
+                memberDiv.remove();
+            });
+        }
+        
+        addMemberBtn.addEventListener('click', () => addMember());
+
+        splitEquallyBtn.addEventListener('click', () => {
+            const totalAmount = parseFloat(document.getElementById('total-amount').value);
+            const memberRows = membersContainer.querySelectorAll('.member-row');
+            if (isNaN(totalAmount) || totalAmount <= 0) {
+                 showToast("Pehle a valid total amount daalein.", 'error');
+                return;
+            }
+            if (memberRows.length === 0) {
+                 showToast("Split karne ke liye kam se kam ek member add karein.", 'error');
+                return;
+            }
+            const amountPerMember = (totalAmount / memberRows.length).toFixed(2);
+            memberRows.forEach(row => {
+                row.querySelector('input[type="number"]').value = amountPerMember;
+            });
+        });
+
+        expenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const totalAmount = parseFloat(document.getElementById('total-amount').value);
+            const description = document.getElementById('description').value.trim();
+            const category = document.getElementById('category').value; // NEW: Get category
+            
+            if (!totalAmount || !description) {
+                showToast("Amount aur description zaroori hai.", 'error');
+                return;
+            }
+
+            const members = [];
+            let splitSum = 0;
+            const memberRows = membersContainer.querySelectorAll('.member-row');
+            if (memberRows.length === 0) {
+                 showToast("Kam se kam ek member add karein.", 'error');
+                return;
+            }
+
+            for (const row of memberRows) {
+                const name = row.querySelector('input[type="text"]').value.trim();
+                const amount = parseFloat(row.querySelector('input[type="number"]').value);
+                if (!name || isNaN(amount)) {
+                    showToast("Har member ka naam aur amount zaroori hai.", 'error');
+                    return;
+                }
+                members.push({ name, amount });
+                splitSum += amount;
+            }
+
+            if (Math.abs(splitSum - totalAmount) > 0.01) {
+                showToast(`Split amount (${splitSum.toFixed(2)}) total amount (${totalAmount.toFixed(2)}) se match nahi karta.`);
+                return;
+            }
+
+            try {
+                const loggedInUsername = localStorage.getItem('kharchTrackerUser');
+                const expensesPath = `/artifacts/${appId}/public/data/expenses`;
+                await addDoc(collection(db, expensesPath), {
+                    description,
+                    totalAmount,
+                    category, // NEW: Save category
+                    members,
+                    createdAt: Timestamp.now(),
+                    addedBy: loggedInUsername
+                });
+                resetExpenseForm();
+            } catch (error) {
+                console.error("Error adding expense: ", error);
+                showToast("Kharch add karne mein samasya aayi.", 'error');
+            }
+        });
+
+        async function fetchAndDisplayExpenses() {
+            if (unsubscribeExpenses) unsubscribeExpenses();
+            const expensesPath = `/artifacts/${appId}/public/data/expenses`;
+            const q = query(collection(db, expensesPath), orderBy("createdAt", "desc"));
+            
+            const loggedInUsername = localStorage.getItem('kharchTrackerUser');
+            const isAdmin = loggedInUsername === 'Shivshree@2004';
+            
+            unsubscribeExpenses = onSnapshot(q, (snapshot) => {
+                allExpensesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderHistory(allExpensesCache); // Use a separate render function
+                
+                // Auto-refresh settlements if the tab is active
+                if(document.getElementById('settle-tab').classList.contains('active')){
+                    calculateAndDisplaySettlements();
+                }
+
+            }, (error) => console.error("Error fetching expenses:", error) );
+        }
+
+        function renderHistory(expenses) {
+             const isAdmin = localStorage.getItem('kharchTrackerUser') === 'Shivshree@2004';
+             expenseHistory.innerHTML = '';
+            if(expenses.length === 0){
+                expenseHistory.innerHTML = `<p class="text-center text-gray-500">Abhi tak koi kharch nahi hai.</p>`;
+            } else {
+                expenses.forEach(expense => {
+                    const expenseCard = document.createElement('div');
+                    expenseCard.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm item-appear';
+                    expenseCard.dataset.searchableText = `${expense.description} ${expense.members.map(m => m.name).join(' ')}`.toLowerCase();
+
+                    const date = expense.createdAt.toDate();
+                    const formattedDate = date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const formattedTime = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+                    const addedByHtml = expense.addedBy ? ` - <span class="font-semibold text-gray-600">${expense.addedBy}</span> ne add kiya` : '';
+                    
+                    const categoryHtml = `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-violet-600 bg-violet-200 dark:bg-violet-900 dark:text-violet-300">${expense.category || 'Other'}</span>`;
+                    const deleteButtonHtml = isAdmin ? `<button data-id="${expense.id}" class="delete-expense-btn text-xs text-red-500 hover:underline mt-1">Delete</button>` : '';
+
+                    let membersHtml = expense.members.map(m => `<div class="flex justify-between text-sm text-gray-600"><span>${m.name}</span><span class="font-medium">₹${m.amount.toFixed(2)}</span></div>`).join('');
+                    expenseCard.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-lg text-gray-800">${expense.description}</p><p class="text-sm text-gray-500">${formattedDate}, ${formattedTime}${addedByHtml}</p></div><div class="text-right flex flex-col items-end"><p class="font-bold text-xl text-violet-600">₹${expense.totalAmount.toFixed(2)}</p>${categoryHtml}</div></div><div class="mt-3 pt-3 border-t border-gray-200 space-y-1">${membersHtml}</div>${deleteButtonHtml ? `<div class="text-right">${deleteButtonHtml}</div>` : ''}`;
+                    expenseHistory.appendChild(expenseCard);
+                });
+            }
+        }
+
+        historySearchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const expenseCards = expenseHistory.querySelectorAll('.item-appear');
+            expenseCards.forEach(card => {
+                const isVisible = card.dataset.searchableText.includes(searchTerm);
+                card.classList.toggle('hidden', !isVisible);
+            });
+        });
+        
+        async function calculateAndDisplaySettlements() {
+            const settlementsContainer = document.getElementById('settlements-container');
+            const balancesContainer = document.getElementById('balances-summary-container');
+            settlementsContainer.innerHTML = '<p class="text-gray-500">Calculating...</p>';
+            balancesContainer.innerHTML = '';
+
+            try {
+                // 1. Fetch all users 
+                const usersCredsPath = `/artifacts/${appId}/public/data/credentials`;
+                const usersSnapshot = await getDocs(collection(db, usersCredsPath));
+                const users = {}; // username -> name
+                const balances = {}; // name -> balance
+                const totalPaid = {}; // name -> amount
+                const totalShare = {}; // name -> amount
+                
+                usersSnapshot.forEach(doc => {
+                    const name = doc.data().name;
+                    users[doc.id] = name;
+                    balances[name] = 0;
+                    totalPaid[name] = 0;
+                    totalShare[name] = 0;
+                });
+
+                // 2. Use cached expenses
+                if (allExpensesCache.length === 0) {
+                    settlementsContainer.innerHTML = '<p class="text-center font-semibold text-green-600 item-appear">Sabka hisab barabar hai! Koi kharch nahi hai.</p>';
+                    return;
+                }
+
+                // 3. Calculate totals
+                allExpensesCache.forEach(expense => {
+                    const payerFullName = users[expense.addedBy];
+                    if (payerFullName && totalPaid.hasOwnProperty(payerFullName)) {
+                        totalPaid[payerFullName] += expense.totalAmount;
+                    }
+                    expense.members.forEach(member => {
+                        if (totalShare.hasOwnProperty(member.name)) {
+                            totalShare[member.name] += member.amount;
+                        }
+                    });
+                });
+                
+                // Calculate final balances and display summary
+                for(const name in totalPaid) {
+                    balances[name] = totalPaid[name] - totalShare[name];
+                    const balance = balances[name];
+                    const balanceColor = balance > 0.01 ? 'text-green-600' : (balance < -0.01 ? 'text-red-600' : 'text-gray-600');
+
+                    const summaryCard = document.createElement('div');
+                    summaryCard.className = 'bg-white p-4 rounded-lg border item-appear';
+                    summaryCard.innerHTML = `
+                        <h4 class="font-bold text-lg text-gray-800">${name}</h4>
+                        <div class="mt-2 text-sm space-y-1">
+                            <div class="flex justify-between"><span>Kul Bhugtan:</span> <span class="font-medium">₹${totalPaid[name].toFixed(2)}</span></div>
+                            <div class="flex justify-between"><span>Kul Hissa:</span> <span class="font-medium">₹${totalShare[name].toFixed(2)}</span></div>
+                            <div class="flex justify-between border-t mt-1 pt-1"><strong>Bakaya:</strong> <strong class="${balanceColor}">₹${balance.toFixed(2)}</strong></div>
+                        </div>
+                    `;
+                    balancesContainer.appendChild(summaryCard);
+                }
+
+                // 4. Simplify debts
+                const debtors = [];
+                const creditors = [];
+
+                for (const person in balances) {
+                    if (balances[person] > 0.01) creditors.push({ name: person, amount: balances[person] });
+                    else if (balances[person] < -0.01) debtors.push({ name: person, amount: balances[person] });
+                }
+                
+                const settlements = [];
+                while (debtors.length > 0 && creditors.length > 0) {
+                    debtors.sort((a, b) => a.amount - b.amount);
+                    creditors.sort((a, b) => b.amount - a.amount);
+
+                    const debtor = debtors[0];
+                    const creditor = creditors[0];
+                    const paymentAmount = Math.min(-debtor.amount, creditor.amount);
+
+                    settlements.push({ from: debtor.name, to: creditor.name, amount: paymentAmount });
+
+                    debtor.amount += paymentAmount;
+                    creditor.amount -= paymentAmount;
+
+                    if (Math.abs(debtor.amount) < 0.01) debtors.shift();
+                    if (Math.abs(creditor.amount) < 0.01) creditors.shift();
+                }
+
+                // 5. Display settlements
+                if (settlements.length === 0) {
+                    settlementsContainer.innerHTML = '<p class="text-center font-semibold text-green-600 item-appear">Sabka hisab barabar hai!</p>';
+                } else {
+                    settlementsContainer.innerHTML = settlements.map(s => `
+                        <div class="bg-white p-4 rounded-lg border flex justify-between items-center text-center item-appear">
+                            <span class="font-medium text-gray-700 w-1/3">${s.from.split(' ')[0]}</span>
+                            <span class="text-gray-500 w-1/3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline -mt-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                ₹${s.amount.toFixed(2)} dega
+                            </span>
+                            <span class="font-medium text-gray-700 w-1/3">${s.to.split(' ')[0]}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error("Error calculating settlements:", error);
+                settlementsContainer.innerHTML = '<p class="text-red-500">Hisab calculate karne mein samasya aayi.</p>';
+            }
+        }
+
+        // NEW: Statistics Generation
+        async function generateStats() {
+            if (allExpensesCache.length === 0) {
+                document.getElementById('stats-summary').innerHTML = '<p class="text-gray-500">Stats dikhane ke liye koi data nahi hai.</p>';
+                if(categoryChartInstance) categoryChartInstance.destroy();
+                if(paidByChartInstance) paidByChartInstance.destroy();
+                return;
+            }
+
+            // Data processing
+            const totalExpense = allExpensesCache.reduce((sum, exp) => sum + exp.totalAmount, 0);
+            const expensesByCategory = {};
+            const paidBy = {};
+            
+            const usersCredsPath = `/artifacts/${appId}/public/data/credentials`;
+            const usersSnapshot = await getDocs(collection(db, usersCredsPath));
+            const userNames = {};
+            usersSnapshot.forEach(doc => userNames[doc.id] = doc.data().name);
+
+
+            allExpensesCache.forEach(exp => {
+                const category = exp.category || 'Other';
+                expensesByCategory[category] = (expensesByCategory[category] || 0) + exp.totalAmount;
+                const payerName = userNames[exp.addedBy] || exp.addedBy;
+                paidBy[payerName] = (paidBy[payerName] || 0) + exp.totalAmount;
+            });
+            
+            // Render summary
+            document.getElementById('stats-summary').innerHTML = `<p class="text-lg text-gray-700">Total Kharch: <span class="font-bold text-violet-600">₹${totalExpense.toFixed(2)}</span></p>`;
+
+            // Chart Colors
+            const chartColors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
+
+            // Category Chart
+            const catCtx = document.getElementById('category-chart').getContext('2d');
+            if(categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance = new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(expensesByCategory),
+                    datasets: [{
+                        data: Object.values(expensesByCategory),
+                        backgroundColor: chartColors,
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+
+            // Paid By Chart
+            const paidCtx = document.getElementById('paid-by-chart').getContext('2d');
+            if(paidByChartInstance) paidByChartInstance.destroy();
+            paidByChartInstance = new Chart(paidCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(paidBy),
+                    datasets: [{
+                        label: 'Total Paid',
+                        data: Object.values(paidBy),
+                        backgroundColor: chartColors,
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+        
+        function downloadSettlements() {
+            try {
+                const balancesContainer = document.getElementById('balances-summary-container');
+                const settlementsContainer = document.getElementById('settlements-container');
+                if (!balancesContainer.hasChildNodes() && !settlementsContainer.hasChildNodes()) {
+                    showToast("Download karne ke liye koi data nahi hai.", 'error'); return;
+                }
+                let reportContent = "Kharch Tracker - Hisab Kitab Report\n====================================\n\nSUMMARY\n-------\n";
+                balancesContainer.querySelectorAll('.item-appear').forEach(card => {
+                    const name = card.querySelector('h4').innerText;
+                    const details = card.querySelectorAll('.flex.justify-between span');
+                    const bakaya = card.querySelector('strong.text-green-600, strong.text-red-600, strong.text-gray-600').innerText;
+                    reportContent += `${name}:\n  - Kul Bhugtan: ${details[1].innerText}\n  - Kul Hissa:   ${details[3].innerText}\n  - Bakaya:      ${bakaya}\n\n`;
+                });
+                reportContent += "FINAL HISAB\n-----------\n";
+                const settlementElements = settlementsContainer.querySelectorAll('.item-appear');
+                if (settlementElements.length > 0 && settlementElements[0].tagName !== 'P') {
+                     settlementElements.forEach(settlement => {
+                        const parts = settlement.querySelectorAll('span');
+                        reportContent += `${parts[0].innerText} -> ${parts[1].innerText.replace(/\s+/g, ' ')} -> ${parts[2].innerText}\n`;
+                    });
+                } else { reportContent += "Sabka hisab barabar hai.\n"; }
+
+                const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "hisab_kitab.txt");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error("Error generating settlement report:", error);
+                showToast("Report generate karne mein samasya aayi.", "error");
+            }
+        }
+        document.getElementById('download-settlement-btn').addEventListener('click', downloadSettlements);
+        
+        expenseHistory.addEventListener('click', async (e) => {
+            if(e.target.classList.contains('delete-expense-btn')) {
+                const expenseId = e.target.dataset.id;
+                if(confirm("Kya aap is kharch ko delete karna chahte hain?")) {
+                    try {
+                        const expenseDocRef = doc(db, `/artifacts/${appId}/public/data/expenses`, expenseId);
+                        await deleteDoc(expenseDocRef);
+                        showToast("Kharch delete ho gaya.", 'success');
+                    } catch(error) {
+                        console.error("Error deleting expense: ", error);
+                        showToast("Kharch delete karne mein samasya aayi.", 'error');
+                    }
+                }
+            }
+        });
+
+        downloadCsvBtn.addEventListener('click', async () => {
+             if (allExpensesCache.length === 0) {
+                showToast("Download karne ke liye koi data nahi hai.", 'error'); return;
+            }
+            let csvContent = "Date,Added By,Description,Category,Total Amount,Member,Share\n";
+            allExpensesCache.forEach(expense => {
+                const date = expense.createdAt.toDate().toLocaleDateString('en-IN');
+                const addedBy = expense.addedBy || 'N/A';
+                expense.members.forEach(member => {
+                    const row = [date, `"${addedBy.replace(/"/g, '""')}"`, `"${expense.description.replace(/"/g, '""')}"`, expense.category || 'Other', expense.totalAmount, `"${member.name.replace(/"/g, '""')}"`, member.amount].join(",");
+                    csvContent += row + "\n";
+                });
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "kharch_report.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // --- App Initialization ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                if (localStorage.getItem('kharchTrackerUser')) {
+                    await showDashboard();
+                } else {
+                    showLoginScreen();
+                }
+            } else {
+                try {
+                    await signInAnonymously(auth);
+                } catch(error) {
+                     console.error("Anonymous sign-in failed:", error);
+                     loader.innerText = "Authentication failed. Cannot load app.";
+                }
+            }
+        });
+        
+        logoutBtn.addEventListener('click', showLoginScreen);
+    </script>
+</body>
+</html>
