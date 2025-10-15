@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="hi" class=""> <!-- Dark mode class is added here -->
+<html lang="en"> <!-- Language set to English -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kharch Tracker Pro</title>
+    <title>Expense Tracker Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -39,44 +39,16 @@
         #sidebar { transition: transform 0.3s ease-in-out; }
         .sidebar-link { display: flex; align-items: center; padding: 12px 16px; border-radius: 8px; transition: background-color 0.2s, color 0.2s; }
         .sidebar-link:hover { background-color: #ede9fe; color: #5b21b6; }
-        .dark .sidebar-link:hover { background-color: #3730a3; color: #e0e7ff; }
         .sidebar-link.active { background-color: #8b5cf6; color: white; font-weight: 600; }
-        .dark .sidebar-link.active { background-color: #a78bfa; color: #1e1b4b; }
 
         /* Modal Styles */
         .modal { z-index: 1040; }
         .modal-overlay { z-index: 1030; background-color: rgba(0,0,0,0.5); }
         .modal-content { animation: zoomIn 0.3s ease-out; }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        /* --- OPTIMIZED DARK MODE --- */
-        .dark body { background: #111827; }
-        .dark .bg-white { background-color: #1f2937; } 
-        .dark .bg-white\/80 { background-color: rgba(31, 41, 55, 0.8); }
-        .dark .text-gray-900 { color: #f9fafb; }
-        .dark .text-gray-800 { color: #f3f4f6; } 
-        .dark .text-gray-700 { color: #e5e7eb; } 
-        .dark .text-gray-600 { color: #d1d5db; } 
-        .dark .text-gray-500 { color: #9ca3af; }
-        .dark .text-gray-400 { color: #9ca3af; }
-        .dark .text-gray-100 { color: #f9fafb; }
-        .dark .border-gray-200 { border-color: #374151; }
-        .dark .form-input { background-color: #374151; border-color: #4b5563; color: #f9fafb; }
-        .dark .form-input::placeholder { color: #9ca3af; }
-        .dark .form-input:read-only { background-color: #4b5563; }
-        .dark .bg-gray-50 { background-color: #1f2937; } 
-        .dark .bg-gray-100 { background-color: #374151; }
-        .dark .bg-violet-50 { background-color: #2c2144; } 
-        .dark .border-violet-200 { border-color: #4c2b92; } 
-        .dark .border-violet-800 { border-color: #4c2b92; }
-        .dark .text-indigo-700 { color: #c7d2fe; } 
-        .dark .bg-indigo-100 { background-color: #3730a3; } 
-        .dark .bg-indigo-100:hover { background-color: #312e81; }
-        .dark .prose-invert { color: #d1d5db; } 
-        .dark .prose-invert h2 { color: #f9fafb; }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900">
+<body class="bg-gray-100">
 
     <!-- LOADER -->
     <div id="loader" class="fixed inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-50 z-[9999]">
@@ -86,13 +58,13 @@
 
     <!-- AUTH CONTAINER -->
     <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
-            <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-gray-100">Kharch Tracker</h1>
+        <div class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+            <h1 class="text-3xl font-bold text-center text-gray-800">Expense Tracker</h1>
             <div id="auth-error" class="text-red-500 text-sm text-center font-medium"></div>
             <form id="auth-form" class="space-y-4">
-                <div><label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label><input type="text" id="username" class="form-input mt-1" required></div>
-                <div><label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label><div class="relative"><input type="password" id="password" class="form-input mt-1 pr-10" required><button type="button" id="toggle-password" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"><svg id="eye-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg><svg id="eye-off-icon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.05 10.05 0 01-4.303 5.436"/></svg></button></div></div>
-                <div class="flex items-center"><input id="admin-checkbox" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"><label for="admin-checkbox" class="ml-2 block text-sm text-gray-900 dark:text-gray-200">Admin ke jaisa login karein</label></div>
+                <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" class="form-input mt-1" required></div>
+                <div><label for="password" class="block text-sm font-medium text-gray-700">Password</label><div class="relative"><input type="password" id="password" class="form-input mt-1 pr-10" required><button type="button" id="toggle-password" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"><svg id="eye-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg><svg id="eye-off-icon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.05 10.05 0 01-4.303 5.436"/></svg></button></div></div>
+                <div class="flex items-center"><input id="admin-checkbox" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500"><label for="admin-checkbox" class="ml-2 block text-sm text-gray-900">Login as Admin</label></div>
                 <div id="auth-buttons" class="pt-2"><button type="submit" id="login-btn" class="btn btn-primary w-full">Login as User</button></div>
             </form>
         </div>
@@ -101,21 +73,20 @@
     <!-- DASHBOARD CONTAINER -->
     <div id="dashboard-container" class="hidden w-full h-screen">
         <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
-        <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white dark:bg-gray-800 shadow-lg z-40 transform -translate-x-full lg:translate-x-0">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700"><h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Kharch Tracker</h1></div>
+        <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-40 transform -translate-x-full lg:translate-x-0">
+            <div class="p-4 border-b border-gray-200"><h1 class="text-2xl font-bold text-gray-800">Expense Tracker</h1></div>
             <nav id="sidebar-nav" class="p-4 space-y-2"></nav>
         </aside>
     
         <div class="lg:ml-64 h-full flex flex-col">
             <!-- HEADER -->
-            <header class="flex justify-between items-center p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20">
+            <header class="flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20">
                 <div class="flex items-center gap-4">
-                    <button id="menu-toggle-btn" class="p-2 rounded-md lg:hidden text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></button>
-                    <h2 id="page-title" class="text-xl font-bold text-gray-800 dark:text-gray-100">Naya Kharch</h2>
+                    <button id="menu-toggle-btn" class="p-2 rounded-md lg:hidden text-gray-600 hover:bg-gray-200"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg></button>
+                    <h2 id="page-title" class="text-xl font-bold text-gray-800">New Expense</h2>
                 </div>
                 <div class="flex items-center gap-4">
-                     <p id="user-display-name" class="text-sm text-gray-600 dark:text-gray-300 hidden sm:block"></p>
-                    <button id="theme-toggle-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><svg id="theme-sun-icon" class="h-6 w-6 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><svg id="theme-moon-icon" class="h-6 w-6 hidden text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></button>
+                     <p id="user-display-name" class="text-sm text-gray-600 hidden sm:block"></p>
                     <button id="logout-btn" class="btn btn-secondary text-sm">Logout</button>
                 </div>
             </header>
@@ -123,30 +94,30 @@
             <!-- MAIN CONTENT AREA -->
             <main id="main-content" class="p-4 sm:p-6 flex-grow overflow-y-auto">
                 <!-- Add Expense Page -->
-                <div id="add-expense-page" class="page-content"><div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl border border-gray-200 dark:border-gray-700"><h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Naya Kharch Add Karein</h2><form id="expense-form" class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div><label for="expense-date" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Date</label><input type="date" id="expense-date" class="form-input mt-1" required></div><div><label for="total-amount" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Total Amount</label><input type="number" id="total-amount" class="form-input mt-1" placeholder="1000.50" required step="0.01"></div><div class="lg:col-span-2"><label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Description</label><input type="text" id="description" class="form-input mt-1" placeholder="Dinner, Groceries" required></div><div><label for="category" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Category</label><select id="category" class="form-input mt-1" required><option value="Food">Food</option><option value="Travel">Travel</option><option value="Shopping">Shopping</option><option value="Bills">Bills</option><option value="Entertainment">Entertainment</option><option value="Other">Other</option></select></div></div><div><h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-2">Hisseydaar (Members)</h3><div id="members-container" class="space-y-2"></div><div class="flex flex-wrap gap-2 mt-3"><button type="button" id="add-member-btn" class="text-sm btn bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">Add Member</button><button type="button" id="split-equally-btn" class="text-sm btn bg-green-500 text-white hover:bg-green-600">Split Equally</button></div><div class="mt-3"><p class="text-xs text-gray-500 mb-1">Quick Add:</p><div id="quick-add-container" class="flex flex-wrap gap-2"></div></div></div><button type="submit" class="btn btn-primary w-full">Save Kharch</button></form></div></div>
+                <div id="add-expense-page" class="page-content"><div class="bg-white p-4 sm:p-6 rounded-xl border border-gray-200"><h2 class="text-2xl font-semibold text-gray-700 mb-4">Add New Expense</h2><form id="expense-form" class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><div><label for="expense-date" class="block text-sm font-medium text-gray-600">Date</label><input type="date" id="expense-date" class="form-input mt-1" required></div><div><label for="total-amount" class="block text-sm font-medium text-gray-600">Total Amount</label><input type="number" id="total-amount" class="form-input mt-1" placeholder="1000.50" required step="0.01"></div><div class="lg:col-span-2"><label for="description" class="block text-sm font-medium text-gray-600">Description</label><input type="text" id="description" class="form-input mt-1" placeholder="Dinner, Groceries" required></div><div><label for="category" class="block text-sm font-medium text-gray-600">Category</label><select id="category" class="form-input mt-1" required><option value="Food">Food</option><option value="Travel">Travel</option><option value="Shopping">Shopping</option><option value="Bills">Bills</option><option value="Entertainment">Entertainment</option><option value="Other">Other</option></select></div></div><div><h3 class="font-semibold text-gray-700 mb-2">Members</h3><div id="members-container" class="space-y-2"></div><div class="flex flex-wrap gap-2 mt-3"><button type="button" id="add-member-btn" class="text-sm btn bg-gray-200 text-gray-700 hover:bg-gray-300">Add Member</button><button type="button" id="split-equally-btn" class="text-sm btn bg-green-500 text-white hover:bg-green-600">Split Equally</button></div><div class="mt-3"><p class="text-xs text-gray-500 mb-1">Quick Add:</p><div id="quick-add-container" class="flex flex-wrap gap-2"></div></div></div><button type="submit" class="btn btn-primary w-full">Save Expense</button></form></div></div>
                 <!-- History Page -->
-                <div id="history-page" class="page-content"><div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4"><input type="text" id="history-search" class="form-input sm:w-64" placeholder="Search..."><button id="download-csv-btn" class="btn bg-gray-700 text-white hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 w-full sm:w-auto">Download Report (CSV)</button></div><div id="expense-history" class="space-y-4"></div></div>
+                <div id="history-page" class="page-content"><div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4"><input type="text" id="history-search" class="form-input sm:w-64" placeholder="Search..."><button id="download-csv-btn" class="btn bg-gray-700 text-white hover:bg-gray-800 w-full sm:w-auto">Download Report (CSV)</button></div><div id="expense-history" class="space-y-4"></div></div>
                 <!-- Hisab Kitab Page -->
-                <div id="hisab-page" class="page-content"><div class="flex flex-wrap justify-between items-center gap-4 mb-4"><button id="download-settlement-btn" class="btn bg-blue-600 text-white hover:bg-blue-700">Download Hisab (TXT)</button><button id="clear-hisab-btn" class="btn btn-secondary hidden">Clear All Hisab</button></div><h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Summary</h3><div id="balances-summary-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div><h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Final Hisab</h3><div id="settlements-container" class="space-y-3"></div></div>
+                <div id="hisab-page" class="page-content"><div class="flex flex-wrap justify-between items-center gap-4 mb-4"><button id="download-settlement-btn" class="btn bg-blue-600 text-white hover:bg-blue-700">Download Settlements (TXT)</button><button id="clear-hisab-btn" class="btn btn-secondary hidden">Clear All Expenses</button></div><h3 class="text-xl font-semibold text-gray-600 mb-2">Summary</h3><div id="balances-summary-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div><h3 class="text-xl font-semibold text-gray-600 mb-2">Final Settlements</h3><div id="settlements-container" class="space-y-3"></div></div>
                 <!-- Stats Page -->
-                <div id="stats-page" class="page-content"><div id="stats-summary" class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center"></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700"><h3 class="font-semibold text-center text-gray-600 dark:text-gray-300 mb-3">Kharch by Category</h3><canvas id="category-chart"></canvas></div><div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700"><h3 class="font-semibold text-center text-gray-600 dark:text-gray-300 mb-3">Total Paid by Each Person</h3><canvas id="paid-by-chart"></canvas></div></div></div>
+                <div id="stats-page" class="page-content"><div id="stats-summary" class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center"></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-white p-4 rounded-xl border border-gray-200"><h3 class="font-semibold text-center text-gray-600 mb-3">Expenses by Category</h3><canvas id="category-chart"></canvas></div><div class="bg-white p-4 rounded-xl border border-gray-200"><h3 class="font-semibold text-center text-gray-600 mb-3">Total Paid by Each Person</h3><canvas id="paid-by-chart"></canvas></div></div></div>
                 <!-- Profile Page -->
-                <div id="profile-page" class="page-content max-w-2xl mx-auto"><div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700"><form id="profile-form" class="space-y-4"></form></div></div>
+                <div id="profile-page" class="page-content max-w-2xl mx-auto"><div class="bg-white p-6 rounded-xl border border-gray-200"><form id="profile-form" class="space-y-4"></form></div></div>
                 <!-- About Page -->
-                <div id="about-page" class="page-content max-w-3xl mx-auto"><div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700"><div class="prose dark:prose-invert"><h2>About Kharch Tracker Pro</h2><p>This application helps you and your friends track shared expenses easily. Created by Shivshree Kumar, this tool simplifies splitting bills and settling debts.</p></div></div></div>
+                <div id="about-page" class="page-content max-w-3xl mx-auto"><div class="bg-white p-6 rounded-xl border border-gray-200"><div class="prose"><h2>About Expense Tracker Pro</h2><p>This application helps you and your friends track shared expenses easily. Created by Shivshree Kumar, this tool simplifies splitting bills and settling debts.</p></div></div></div>
                 <!-- Contact Us Page -->
-                <div id="contact-us-page" class="page-content max-w-2xl mx-auto"><div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700"><h3 class="text-xl font-semibold mb-4">Contact Admin</h3><form id="contact-form" class="space-y-4"><div><label for="contact-name" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Your Name</label><input type="text" id="contact-name" class="form-input mt-1" required readonly></div><div><label for="contact-email" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Your Email</label><input type="email" id="contact-email" class="form-input mt-1" required></div><div><label for="contact-message" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Message</label><textarea id="contact-message" rows="4" class="form-input mt-1" required></textarea></div><button type="submit" class="btn btn-primary w-full">Send Message</button></form></div></div>
+                <div id="contact-us-page" class="page-content max-w-2xl mx-auto"><div class="bg-white p-6 rounded-xl border border-gray-200"><h3 class="text-xl font-semibold mb-4">Contact Admin</h3><form id="contact-form" class="space-y-4"><div><label for="contact-name" class="block text-sm font-medium text-gray-600">Your Name</label><input type="text" id="contact-name" class="form-input mt-1" required readonly></div><div><label for="contact-email" class="block text-sm font-medium text-gray-600">Your Email</label><input type="email" id="contact-email" class="form-input mt-1" required></div><div><label for="contact-message" class="block text-sm font-medium text-gray-600">Message</label><textarea id="contact-message" rows="4" class="form-input mt-1" required></textarea></div><button type="submit" class="btn btn-primary w-full">Send Message</button></form></div></div>
                 <!-- Admin Panel Page -->
-                <div id="admin-page" class="page-content"><div class="bg-violet-50 dark:bg-violet-900/20 p-4 sm:p-6 rounded-xl border border-violet-200 dark:border-violet-800"><h3 class="text-xl font-semibold mb-4">Add New User</h3><form id="add-user-form" class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><div><label class="block text-sm font-medium">Full Name</label><input type="text" id="new-full-name" class="form-input mt-1" required></div><div><label class="block text-sm font-medium">Username</label><input type="text" id="new-username" class="form-input mt-1" required></div><div><label class="block text-sm font-medium">Password</label><input type="password" id="new-password" class="form-input mt-1" required></div><div><label class="block text-sm font-medium">Mobile</label><input type="tel" id="new-mobile" class="form-input mt-1"></div><div><label class="block text-sm font-medium">Email</label><input type="email" id="new-email" class="form-input mt-1"></div><div><label class="block text-sm font-medium">Gender</label><select id="new-gender" class="form-input mt-1"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div></div><button type="submit" class="btn btn-primary w-full md:w-auto">Add User</button></form></div><div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-3">Manage Users</h3><div id="user-list-container" class="space-y-3"></div></div><div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-3">Contact Messages</h3><div id="messages-container" class="space-y-3 max-h-60 overflow-y-auto pr-2"></div></div></div>
+                <div id="admin-page" class="page-content"><div class="bg-violet-50 p-4 sm:p-6 rounded-xl border border-violet-200"><h3 class="text-xl font-semibold mb-4">Add New User</h3><form id="add-user-form" class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"><div><label class="block text-sm font-medium">Full Name</label><input type="text" id="new-full-name" class="form-input mt-1" required></div><div><label class="block text-sm font-medium">Username</label><input type="text" id="new-username" class="form-input mt-1" required></div><div><label class="block text-sm font-medium">Password</label><input type="password" id="new-password" class="form-input mt-1" required></div><div><label class="block text-sm font-medium">Mobile</label><input type="tel" id="new-mobile" class="form-input mt-1"></div><div><label class="block text-sm font-medium">Email</label><input type="email" id="new-email" class="form-input mt-1"></div><div><label class="block text-sm font-medium">Gender</label><select id="new-gender" class="form-input mt-1"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div></div><button type="submit" class="btn btn-primary w-full md:w-auto">Add User</button></form></div><div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 mb-3">Manage Users</h3><div id="user-list-container" class="space-y-3"></div></div><div class="mt-6"><h3 class="text-xl font-semibold text-gray-700 mb-3">Contact Messages</h3><div id="messages-container" class="space-y-3 max-h-60 overflow-y-auto pr-2"></div></div></div>
             </main>
         </div>
     </div>
 
     <!-- MODALS -->
-    <div id="edit-user-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-lg z-50"><h3 class="text-xl font-bold mb-4">Edit User</h3><form id="edit-user-form" class="space-y-4"></form></div></div>
-    <div id="confirm-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm z-50"><h3 id="confirm-modal-title" class="text-lg font-bold mb-4">Confirm Action</h3><p id="confirm-modal-text" class="text-gray-600 dark:text-gray-300 mb-6"></p><div class="flex justify-end gap-4"><button id="confirm-modal-cancel" class="btn bg-gray-200 dark:bg-gray-600">Cancel</button><button id="confirm-modal-ok" class="btn btn-secondary">Confirm</button></div></div></div>
-    <div id="edit-expense-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl z-50"><h3 class="text-xl font-bold mb-4">Edit Kharch</h3><form id="edit-expense-form" class="space-y-4 max-h-[80vh] overflow-y-auto"></form></div></div>
-    <div id="settle-payment-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md z-50"><h3 id="settle-modal-title" class="text-xl font-bold mb-4">Settle Payment</h3><form id="settle-payment-form" class="space-y-4"></form></div></div>
+    <div id="edit-user-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white p-6 rounded-lg shadow-xl w-full max-w-lg z-50"><h3 class="text-xl font-bold mb-4">Edit User</h3><form id="edit-user-form" class="space-y-4"></form></div></div>
+    <div id="confirm-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white p-6 rounded-lg shadow-xl w-full max-w-sm z-50"><h3 id="confirm-modal-title" class="text-lg font-bold mb-4">Confirm Action</h3><p id="confirm-modal-text" class="text-gray-600 mb-6"></p><div class="flex justify-end gap-4"><button id="confirm-modal-cancel" class="btn bg-gray-200">Cancel</button><button id="confirm-modal-ok" class="btn btn-secondary">Confirm</button></div></div></div>
+    <div id="edit-expense-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl z-50"><h3 class="text-xl font-bold mb-4">Edit Expense</h3><form id="edit-expense-form" class="space-y-4 max-h-[80vh] overflow-y-auto"></form></div></div>
+    <div id="settle-payment-modal" class="fixed inset-0 items-center justify-center hidden modal"><div class="modal-overlay fixed inset-0 bg-black opacity-50"></div><div class="modal-content bg-white p-6 rounded-lg shadow-xl w-full max-w-md z-50"><h3 id="settle-modal-title" class="text-xl font-bold mb-4">Settle Payment</h3><form id="settle-payment-form" class="space-y-4"></form></div></div>
     
     <div id="toast"></div>
 
@@ -174,8 +145,7 @@
             editUserModal: { modal: document.getElementById('edit-user-modal'), form: document.getElementById('edit-user-form') },
             editExpenseModal: { modal: document.getElementById('edit-expense-modal'), form: document.getElementById('edit-expense-form') },
             settlePaymentModal: { modal: document.getElementById('settle-payment-modal'), form: document.getElementById('settle-payment-form'), title: document.getElementById('settle-modal-title') },
-            confirmModal: { modal: document.getElementById('confirm-modal'), title: document.getElementById('confirm-modal-title'), text: document.getElementById('confirm-modal-text'), okBtn: document.getElementById('confirm-modal-ok'), cancelBtn: document.getElementById('confirm-modal-cancel') },
-            theme: { btn: document.getElementById('theme-toggle-btn'), sun: document.getElementById('theme-sun-icon'), moon: document.getElementById('theme-moon-icon') }
+            confirmModal: { modal: document.getElementById('confirm-modal'), title: document.getElementById('confirm-modal-title'), text: document.getElementById('confirm-modal-text'), okBtn: document.getElementById('confirm-modal-ok'), cancelBtn: document.getElementById('confirm-modal-cancel') }
         };
 
         const state = { allExpensesCache: [], allUsersCache: new Map(), currentUser: null };
@@ -230,11 +200,14 @@
         function setupSidebar() {
             const isAdmin = state.currentUser.role === 'Super Admin';
             const navLinks = [
-                { id: 'add-expense-page', icon: 'M12 4v16m8-8H4', text: 'Naya Kharch' }, { id: 'history-page', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', text: 'History' },
-                { id: 'hisab-page', icon: 'M9 7h6m0 10v-3.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 008.586 7H7a2 2 0 00-2 2v8a2 2 0 002 2h4a2 2 0 002-2z', text: 'Hisab Kitab' }, { id: 'stats-page', icon: 'M3 13.125C3 12.504 3.504 12 4.125 12h15.75c.621 0 1.125.504 1.125 1.125v6.75C21 20.496 20.496 21 19.875 21H4.125C3.504 21 3 20.496 3 19.875v-6.75zM4 12V6a2 2 0 012-2h12a2 2 0 012 2v6', text: 'Stats' },
+                { id: 'add-expense-page', icon: 'M12 4v16m8-8H4', text: 'New Expense' }, 
+                { id: 'history-page', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', text: 'History' },
+                { id: 'hisab-page', icon: 'M9 7h6m0 10v-3.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 008.586 7H7a2 2 0 00-2 2v8a2 2 0 002 2h4a2 2 0 002-2z', text: 'Settlements' }, 
+                { id: 'stats-page', icon: 'M3 13.125C3 12.504 3.504 12 4.125 12h15.75c.621 0 1.125.504 1.125 1.125v6.75C21 20.496 20.496 21 19.875 21H4.125C3.504 21 3 20.496 3 19.875v-6.75zM4 12V6a2 2 0 012-2h12a2 2 0 012 2v6', text: 'Stats' },
                 { id: 'profile-page', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', text: 'Profile' },
                 isAdmin && { id: 'admin-page', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z', text: 'Admin Panel' },
-                { id: 'about-page', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', text: 'About' }, { id: 'contact-us-page', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', text: 'Contact Us' }
+                { id: 'about-page', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', text: 'About' }, 
+                { id: 'contact-us-page', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', text: 'Contact Us' }
             ].filter(Boolean);
             ui.sidebarNav.innerHTML = navLinks.map(link => `<a href="#" class="sidebar-link" data-page="${link.id}"><svg class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${link.icon}"/></svg><span>${link.text}</span></a>`).join('');
         }
@@ -276,7 +249,7 @@
             const originalText = ui.adminCheckbox.checked ? 'Login as Admin' : 'Login as User';
             toggleButtonLoading(loginBtn, true, originalText);
             const username = ui.usernameInput.value; const password = ui.passwordInput.value;
-            if (!username || !password) { ui.authError.textContent = "Username aur password zaroori hai."; toggleButtonLoading(loginBtn, false, originalText); return; }
+            if (!username || !password) { ui.authError.textContent = "Username and password are required."; toggleButtonLoading(loginBtn, false, originalText); return; }
             
             try {
                 const docSnap = await getDoc(doc(db, `/artifacts/${appId}/public/data/credentials`, username));
@@ -292,9 +265,9 @@
                     localStorage.setItem('kharchTrackerUser', JSON.stringify(state.currentUser));
                     await showDashboard();
                 } else {
-                    ui.authError.textContent = "Galat username ya password.";
+                    ui.authError.textContent = "Invalid username or password.";
                 }
-            } catch (error) { ui.authError.textContent = "Login karne mein samasya aayi."; } 
+            } catch (error) { ui.authError.textContent = "An error occurred during login."; } 
             finally { toggleButtonLoading(loginBtn, false, originalText); }
         }
         
@@ -310,7 +283,7 @@
         function addMember(name = '', amount = '') {
             const memberDiv = document.createElement('div');
             memberDiv.className = 'flex items-center gap-2 member-row';
-            memberDiv.innerHTML = `<input type="text" value="${name}" class="form-input flex-grow" placeholder="Member ka naam" required><input type="number" value="${amount}" class="form-input w-28" placeholder="Amount" required step="0.01"><button type="button" class="remove-member-btn text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>`;
+            memberDiv.innerHTML = `<input type="text" value="${name}" class="form-input flex-grow" placeholder="Member Name" required><input type="number" value="${amount}" class="form-input w-28" placeholder="Amount" required step="0.01"><button type="button" class="remove-member-btn text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>`;
             ui.membersContainer.appendChild(memberDiv);
             memberDiv.querySelector('.remove-member-btn').addEventListener('click', () => { memberDiv.remove(); });
         }
@@ -328,7 +301,7 @@
                     button.addEventListener('click', () => {
                         const existingMembers = Array.from(ui.membersContainer.querySelectorAll('input[type="text"]')).map(input => input.value);
                         if (!existingMembers.includes(userData.name)) addMember(userData.name);
-                        else showToast(`${userData.name} pehle se added hai.`, 'error');
+                        else showToast(`${userData.name} is already added.`, 'error');
                     });
                     quickAddContainer.appendChild(button);
                 }
@@ -339,16 +312,16 @@
              const expenseHistoryEl = document.getElementById('expense-history');
              const isAdmin = state.currentUser.role === 'Super Admin';
              expenseHistoryEl.innerHTML = '';
-            if(expenses.length === 0){ expenseHistoryEl.innerHTML = `<p class="text-center text-gray-500">Abhi tak koi kharch nahi hai.</p>`; return; }
+            if(expenses.length === 0){ expenseHistoryEl.innerHTML = `<p class="text-center text-gray-500">No expenses recorded yet.</p>`; return; }
             expenses.forEach(expense => {
                 const expenseCard = document.createElement('div');
-                expenseCard.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm';
+                expenseCard.className = 'bg-white p-4 rounded-lg border border-gray-200 shadow-sm';
                 const formattedDate = expense.createdAt.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
                 expenseCard.dataset.searchableText = `${expense.description} ${expense.members.map(m => m.name).join(' ')} ${formattedDate}`.toLowerCase();
-                const categoryHtml = `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-violet-600 bg-violet-200 dark:bg-violet-900 dark:text-violet-300">${expense.category || 'Other'}</span>`;
+                const categoryHtml = `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-violet-600 bg-violet-200">${expense.category || 'Other'}</span>`;
                 const adminButtons = isAdmin ? `<div class="flex gap-2"><button data-id="${expense.id}" class="edit-expense-btn text-xs text-blue-500 hover:underline">Edit</button><button data-id="${expense.id}" class="delete-expense-btn text-xs text-red-500 hover:underline">Delete</button></div>` : '';
-                let membersHtml = expense.members.map(m => `<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400"><span>${m.name}</span><span class="font-medium">₹${m.amount.toFixed(2)}</span></div>`).join('');
-                expenseCard.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-lg text-gray-800 dark:text-gray-100">${expense.description}</p><p class="text-sm text-gray-500">${formattedDate}</p></div><div class="text-right flex flex-col items-end"><p class="font-bold text-xl text-violet-600">₹${expense.totalAmount.toFixed(2)}</p>${categoryHtml}</div></div><div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-1">${membersHtml}</div><div class="text-right mt-2">${adminButtons}</div>`;
+                let membersHtml = expense.members.map(m => `<div class="flex justify-between text-sm text-gray-600"><span>${m.name}</span><span class="font-medium">₹${m.amount.toFixed(2)}</span></div>`).join('');
+                expenseCard.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-lg text-gray-800">${expense.description}</p><p class="text-sm text-gray-500">${formattedDate}</p></div><div class="text-right flex flex-col items-end"><p class="font-bold text-xl text-violet-600">₹${expense.totalAmount.toFixed(2)}</p>${categoryHtml}</div></div><div class="mt-3 pt-3 border-t border-gray-200 space-y-1">${membersHtml}</div><div class="text-right mt-2">${adminButtons}</div>`;
                 expenseHistoryEl.appendChild(expenseCard);
             });
         }
@@ -362,7 +335,7 @@
         async function openEditUserModal(username) {
             const data = state.allUsersCache.get(username);
             if(!data) { showToast("User not found.", "error"); return; }
-            ui.editUserModal.form.innerHTML = `<input type="hidden" id="edit-username" value="${username}"><div><label class="block text-sm font-medium">Full Name</label><input type="text" id="edit-full-name" class="form-input mt-1" value="${data.name||''}"></div><div><label class="block text-sm font-medium">Password (leave blank to keep)</label><input type="password" id="edit-password" class="form-input mt-1"></div><div><label class="block text-sm font-medium">Mobile</label><input type="tel" id="edit-mobile" class="form-input mt-1" value="${data.mobile||''}"></div><div><label class="block text-sm font-medium">Email</label><input type="email" id="edit-email" class="form-input mt-1" value="${data.email||''}"></div><div><label class="block text-sm font-medium">Gender</label><select id="edit-gender" class="form-input mt-1"><option value="">Select</option><option value="Male" ${data.gender==='Male'?'selected':''}>Male</option><option value="Female" ${data.gender==='Female'?'selected':''}>Female</option><option value="Other" ${data.gender==='Other'?'selected':''}>Other</option></select></div><div class="flex justify-end gap-4 mt-4"><button type="button" class="btn-cancel-modal btn bg-gray-200 dark:bg-gray-600">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>`;
+            ui.editUserModal.form.innerHTML = `<input type="hidden" id="edit-username" value="${username}"><div><label class="block text-sm font-medium">Full Name</label><input type="text" id="edit-full-name" class="form-input mt-1" value="${data.name||''}"></div><div><label class="block text-sm font-medium">Password (leave blank to keep)</label><input type="password" id="edit-password" class="form-input mt-1"></div><div><label class="block text-sm font-medium">Mobile</label><input type="tel" id="edit-mobile" class="form-input mt-1" value="${data.mobile||''}"></div><div><label class="block text-sm font-medium">Email</label><input type="email" id="edit-email" class="form-input mt-1" value="${data.email||''}"></div><div><label class="block text-sm font-medium">Gender</label><select id="edit-gender" class="form-input mt-1"><option value="">Select</option><option value="Male" ${data.gender==='Male'?'selected':''}>Male</option><option value="Female" ${data.gender==='Female'?'selected':''}>Female</option><option value="Other" ${data.gender==='Other'?'selected':''}>Other</option></select></div><div class="flex justify-end gap-4 mt-4"><button type="button" class="btn-cancel-modal btn bg-gray-200">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>`;
             ui.editUserModal.modal.classList.remove('hidden'); ui.editUserModal.modal.classList.add('flex');
         }
 
@@ -380,7 +353,7 @@
                     <div><label class="block text-sm font-medium">Category</label><select id="edit-expense-category" class="form-input mt-1">${categories.map(c => `<option value="${c}" ${expense.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-2">Members</h3>
+                    <h3 class="font-semibold text-gray-700 mb-2">Members</h3>
                     <div id="edit-expense-members" class="space-y-2">
                         ${expense.members.map(m => `
                             <div class="flex items-center gap-2">
@@ -390,7 +363,7 @@
                     </div>
                 </div>
                 <div class="flex justify-end gap-4 mt-4">
-                    <button type="button" class="btn-cancel-modal btn bg-gray-200 dark:bg-gray-600">Cancel</button>
+                    <button type="button" class="btn-cancel-modal btn bg-gray-200">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>`;
             ui.editExpenseModal.modal.classList.remove('hidden');
@@ -405,7 +378,7 @@
                 <div><label class="block text-sm font-medium">Amount</label><input type="number" id="settle-amount" class="form-input mt-1" value="${Math.abs(balance).toFixed(2)}" max="${Math.abs(balance).toFixed(2)}" step="0.01" required></div>
                 <div><label class="block text-sm font-medium">Paid To</label><select id="settle-receiver-name" class="form-input mt-1">${Array.from(state.allUsersCache.values()).filter(u => u.name !== payerName).map(u => `<option value="${u.name}">${u.name}</option>`).join('')}</select></div>
                 <div class="flex justify-end gap-4 mt-4">
-                    <button type="button" class="btn-cancel-modal btn bg-gray-200 dark:bg-gray-600">Cancel</button>
+                    <button type="button" class="btn-cancel-modal btn bg-gray-200">Cancel</button>
                     <button type="submit" class="btn btn-primary">Record Payment</button>
                 </div>`;
             modal.modal.classList.remove('hidden');
@@ -420,8 +393,8 @@
                 state.allUsersCache.forEach(userData => {
                     if (userData.role === 'Super Admin') return;
                     const userCard = document.createElement('div');
-                    userCard.className = 'bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2';
-                    userCard.innerHTML = `<div class="flex-1"><p class="font-semibold text-gray-800 dark:text-gray-100">${userData.name}</p><p class="text-sm text-gray-500">Username: ${userData.id}</p><div class="text-xs text-gray-600 dark:text-gray-400 mt-1"><span>${userData.mobile || 'No mobile'}</span> | <span>${userData.email || 'No email'}</span> | <span>${userData.gender || 'N/A'}</span></div></div><div class="flex items-center gap-2 self-start sm:self-center"><button data-username="${userData.id}" class="edit-user-btn btn bg-blue-500 text-white text-xs px-3 py-1">Edit</button><button data-username="${userData.id}" class="delete-user-btn btn btn-secondary text-xs px-3 py-1">Remove</button></div>`;
+                    userCard.className = 'bg-white p-3 rounded-lg border border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2';
+                    userCard.innerHTML = `<div class="flex-1"><p class="font-semibold text-gray-800">${userData.name}</p><p class="text-sm text-gray-500">Username: ${userData.id}</p><div class="text-xs text-gray-600 mt-1"><span>${userData.mobile || 'No mobile'}</span> | <span>${userData.email || 'No email'}</span> | <span>${userData.gender || 'N/A'}</span></div></div><div class="flex items-center gap-2 self-start sm:self-center"><button data-username="${userData.id}" class="edit-user-btn btn bg-blue-500 text-white text-xs px-3 py-1">Edit</button><button data-username="${userData.id}" class="delete-user-btn btn btn-secondary text-xs px-3 py-1">Remove</button></div>`;
                     userListContainer.appendChild(userCard);
                 });
             });
@@ -436,8 +409,8 @@
                     const data = docSnap.data();
                     const date = data.sentAt.toDate().toLocaleString('en-IN');
                     const messageCard = document.createElement('div');
-                    messageCard.className = 'bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700';
-                    messageCard.innerHTML = `<p class="font-semibold">${data.name} <span class="font-normal text-gray-500 text-sm">(${data.email})</span></p><p class="text-gray-700 dark:text-gray-300 my-1">${data.message}</p><p class="text-xs text-gray-400 text-right">${date}</p>`;
+                    messageCard.className = 'bg-white p-3 rounded-lg border border-gray-200';
+                    messageCard.innerHTML = `<p class="font-semibold">${data.name} <span class="font-normal text-gray-500 text-sm">(${data.email})</span></p><p class="text-gray-700 my-1">${data.message}</p><p class="text-xs text-gray-400 text-right">${date}</p>`;
                     messagesContainer.appendChild(messageCard);
                 });
             });
@@ -452,7 +425,7 @@
             const balances = {}; const totalPaid = {}; const totalShare = {};
             state.allUsersCache.forEach(user => { balances[user.name] = 0; totalPaid[user.name] = 0; totalShare[user.name] = 0; });
 
-            if (state.allExpensesCache.length === 0) { settlementsContainer.innerHTML = '<p class="text-center font-semibold text-green-600">Sabka hisab barabar hai!</p>'; return; }
+            if (state.allExpensesCache.length === 0) { settlementsContainer.innerHTML = '<p class="text-center font-semibold text-green-600">All settled up!</p>'; return; }
             
             state.allExpensesCache.forEach(expense => {
                 const payer = state.allUsersCache.get(expense.addedBy);
@@ -467,8 +440,8 @@
                 const balanceColor = balance > 0.01 ? 'text-green-600' : (balance < -0.01 ? 'text-red-600' : 'text-gray-600');
                 const settleButton = balance < -0.01 ? `<button data-payer="${name}" data-balance="${balance}" class="settle-btn btn btn-primary text-xs mt-2">Settle</button>` : '';
                 const summaryCard = document.createElement('div');
-                summaryCard.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex flex-col justify-between';
-                summaryCard.innerHTML = `<div><h4 class="font-bold text-lg">${name}</h4><div class="mt-2 text-sm space-y-1"><div class="flex justify-between"><span>Kul Bhugtan:</span> <span class="font-medium">₹${(totalPaid[name] || 0).toFixed(2)}</span></div><div class="flex justify-between"><span>Kul Hissa:</span> <span class="font-medium">₹${(totalShare[name] || 0).toFixed(2)}</span></div><div class="flex justify-between border-t border-gray-200 dark:border-gray-700 mt-1 pt-1"><strong>Bakaya:</strong> <strong class="${balanceColor}">₹${balance.toFixed(2)}</strong></div></div></div><div class="text-right">${settleButton}</div>`;
+                summaryCard.className = 'bg-white p-4 rounded-lg border border-gray-200 flex flex-col justify-between';
+                summaryCard.innerHTML = `<div><h4 class="font-bold text-lg">${name}</h4><div class="mt-2 text-sm space-y-1"><div class="flex justify-between"><span>Total Paid:</span> <span class="font-medium">₹${(totalPaid[name] || 0).toFixed(2)}</span></div><div class="flex justify-between"><span>Total Share:</span> <span class="font-medium">₹${(totalShare[name] || 0).toFixed(2)}</span></div><div class="flex justify-between border-t border-gray-200 mt-1 pt-1"><strong>Balance:</strong> <strong class="${balanceColor}">₹${balance.toFixed(2)}</strong></div></div></div><div class="text-right">${settleButton}</div>`;
                 balancesContainer.appendChild(summaryCard);
             });
             
@@ -485,11 +458,33 @@
                 if (Math.abs(debtor.amount) < 0.01) debtors.shift(); if (Math.abs(creditor.amount) < 0.01) creditors.shift();
             }
 
-            if (settlements.length === 0) { settlementsContainer.innerHTML = '<p class="text-center font-semibold text-green-600">Sabka hisab barabar hai!</p>'; } 
-            else { settlementsContainer.innerHTML = settlements.map(s => `<div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center text-center"><span class="font-medium w-1/3">${s.from.split(' ')[0]}</span><span class="text-gray-500 w-1/3"><svg class="h-5 w-5 inline -mt-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> ₹${s.amount.toFixed(2)} dega</span><span class="font-medium w-1/3">${s.to.split(' ')[0]}</span></div>`).join(''); }
+            if (settlements.length === 0) { settlementsContainer.innerHTML = '<p class="text-center font-semibold text-green-600">All settled up!</p>'; } 
+            else { settlementsContainer.innerHTML = settlements.map(s => `<div class="bg-white p-4 rounded-lg border border-gray-200 flex justify-between items-center text-center"><span class="font-medium w-1/3">${s.from.split(' ')[0]}</span><span class="text-gray-500 w-1/3"><svg class="h-5 w-5 inline -mt-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg> owes ₹${s.amount.toFixed(2)}</span><span class="font-medium w-1/3">${s.to.split(' ')[0]}</span></div>`).join(''); }
         }
         
-        async function generateStats() { /* ... full implementation from previous response ... */ }
+        async function generateStats() {
+            const statsSummary = document.getElementById('stats-summary');
+            if (state.allExpensesCache.length === 0) { statsSummary.innerHTML = '<p class="text-gray-500">No data to show stats.</p>'; if(categoryChartInstance) categoryChartInstance.destroy(); if(paidByChartInstance) paidByChartInstance.destroy(); return; }
+            
+            const totalExpense = state.allExpensesCache.reduce((sum, exp) => sum + exp.totalAmount, 0);
+            const expensesByCategory = {}; const paidBy = {};
+            
+            state.allExpensesCache.forEach(exp => {
+                const category = exp.category || 'Other'; expensesByCategory[category] = (expensesByCategory[category] || 0) + exp.totalAmount;
+                const payer = state.allUsersCache.get(exp.addedBy);
+                if(payer) paidBy[payer.name] = (paidBy[payer.name] || 0) + exp.totalAmount;
+            });
+            
+            const topSpender = Object.entries(paidBy).sort(([,a],[,b]) => b-a)[0];
+            statsSummary.innerHTML = `<div class="bg-white p-4 rounded-lg border border-gray-200"><p class="text-sm text-gray-500">Total Spent</p><p class="text-2xl font-bold text-violet-600">₹${totalExpense.toFixed(2)}</p></div><div class="bg-white p-4 rounded-lg border border-gray-200"><p class="text-sm text-gray-500">Top Spender</p><p class="text-2xl font-bold text-green-500">${topSpender ? topSpender[0] : 'N/A'}</p></div>`;
+            
+            const chartColors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
+            if(categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance = new Chart(document.getElementById('category-chart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(expensesByCategory), datasets: [{ data: Object.values(expensesByCategory), backgroundColor: chartColors }] }, options: { responsive: true }});
+            
+            if(paidByChartInstance) paidByChartInstance.destroy();
+            paidByChartInstance = new Chart(document.getElementById('paid-by-chart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(paidBy), datasets: [{ label: 'Total Paid', data: Object.values(paidBy), backgroundColor: chartColors[0] }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }});
+        }
         
         // --- EVENT LISTENERS ---
         ui.authForm.addEventListener('submit', handleLogin);
@@ -507,22 +502,22 @@
         });
 
         ui.expenseForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); const submitBtn = e.target.querySelector('button[type="submit"]'); toggleButtonLoading(submitBtn, true, 'Save Kharch');
+            e.preventDefault(); const submitBtn = e.target.querySelector('button[type="submit"]'); toggleButtonLoading(submitBtn, true, 'Save Expense');
             const data = { date: document.getElementById('expense-date').value, amount: parseFloat(document.getElementById('total-amount').value), desc: document.getElementById('description').value.trim(), cat: document.getElementById('category').value };
-            if (!data.date || !data.amount || !data.desc) { showToast("Date, Amount, aur Description zaroori hai.", 'error'); toggleButtonLoading(submitBtn, false, 'Save Kharch'); return; }
+            if (!data.date || !data.amount || !data.desc) { showToast("Date, Amount, and Description are required.", 'error'); toggleButtonLoading(submitBtn, false, 'Save Expense'); return; }
             const members = []; let splitSum = 0; const memberRows = ui.membersContainer.querySelectorAll('.member-row');
-            if (memberRows.length === 0) { showToast("Kam se kam ek member add karein.", 'error'); toggleButtonLoading(submitBtn, false, 'Save Kharch'); return; }
+            if (memberRows.length === 0) { showToast("Add at least one member.", 'error'); toggleButtonLoading(submitBtn, false, 'Save Expense'); return; }
             for (const row of memberRows) {
                 const name = row.querySelector('input[type="text"]').value.trim(); const amount = parseFloat(row.querySelector('input[type="number"]').value);
-                if (!name || isNaN(amount)) { showToast("Har member ka naam aur amount zaroori hai.", 'error'); toggleButtonLoading(submitBtn, false, 'Save Kharch'); return; }
+                if (!name || isNaN(amount)) { showToast("Each member must have a name and amount.", 'error'); toggleButtonLoading(submitBtn, false, 'Save Expense'); return; }
                 members.push({ name, amount }); splitSum += amount;
             }
-            if (Math.abs(splitSum - data.amount) > 0.01) { showToast(`Split amount (${splitSum.toFixed(2)}) total amount (${data.amount.toFixed(2)}) se match nahi karta.`, 'error'); toggleButtonLoading(submitBtn, false, 'Save Kharch'); return; }
+            if (Math.abs(splitSum - data.amount) > 0.01) { showToast(`Split amount (${splitSum.toFixed(2)}) does not match total (${data.amount.toFixed(2)}).`, 'error'); toggleButtonLoading(submitBtn, false, 'Save Expense'); return; }
             try {
-                await addDoc(collection(db, `/artifacts/${appId}/public/data/expenses`), { description: data.desc, totalAmount: data.amount, category: data.cat, members, createdAt: Timestamp.now(), addedBy: state.currentUser.id });
+                await addDoc(collection(db, `/artifacts/${appId}/public/data/expenses`), { description: data.desc, totalAmount: data.amount, category: data.cat, members, createdAt: Timestamp.fromDate(new Date(data.date)), addedBy: state.currentUser.id });
                 resetExpenseForm();
-            } catch (error) { showToast("Kharch add karne mein samasya aayi.", 'error'); } 
-            finally { toggleButtonLoading(submitBtn, false, 'Save Kharch'); }
+            } catch (error) { showToast("Error adding expense.", 'error'); } 
+            finally { toggleButtonLoading(submitBtn, false, 'Save Expense'); }
         });
 
         document.getElementById('profile-form').addEventListener('submit', async (e) => {
@@ -629,14 +624,14 @@
             if(deleteBtn) {
                 const expenseId = deleteBtn.dataset.id;
                 if(await showConfirmModal('Delete Expense?', 'Are you sure you want to delete this expense?')) {
-                    try { await deleteDoc(doc(db, `/artifacts/${appId}/public/data/expenses`, expenseId)); showToast("Kharch delete ho gaya.", 'success'); } 
-                    catch(error) { showToast("Kharch delete karne mein samasya aayi.", 'error'); }
+                    try { await deleteDoc(doc(db, `/artifacts/${appId}/public/data/expenses`, expenseId)); showToast("Expense deleted.", 'success'); } 
+                    catch(error) { showToast("Error deleting expense.", 'error'); }
                 }
             }
         });
 
         ui.clearHisabBtn.addEventListener('click', async () => {
-            if (await showConfirmModal("Clear All Hisab?", "This will archive all current expenses. This action cannot be undone.")) {
+            if (await showConfirmModal("Clear All Expenses?", "This will archive all current expenses. This action cannot be undone.")) {
                 ui.loader.classList.remove('hidden');
                 try {
                     const expensesSnapshot = await getDocs(collection(db, `/artifacts/${appId}/public/data/expenses`));
@@ -670,21 +665,6 @@
                 catch(error) { ui.loader.innerText = "Authentication failed."; }
             }
         });
-        
-        ui.theme.btn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            themeCheck();
-        });
-        const themeCheck = () => {
-            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { 
-                document.documentElement.classList.add('dark'); ui.theme.sun.classList.add('hidden'); ui.theme.moon.classList.remove('hidden'); 
-            } else { 
-                document.documentElement.classList.remove('dark'); ui.theme.sun.classList.remove('hidden'); ui.theme.moon.classList.add('hidden'); 
-            }
-        };
-        themeCheck();
-
     </script>
 </body>
 </html>
