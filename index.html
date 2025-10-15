@@ -134,6 +134,40 @@
             padding: 24px;
             box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
         }
+        
+        .expense-paid {
+            border-left: 4px solid #10b981;
+        }
+        
+        .expense-partial {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .expense-pending {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .payment-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-pending {
+            background: #fee2e2;
+            color: #991b1b;
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -494,6 +528,8 @@
                                     <li>Visualize spending with charts</li>
                                     <li>Calculate settlements automatically</li>
                                     <li>Export data for record keeping</li>
+                                    <li>Payment tracking and status updates</li>
+                                    <li>Admin controls for expense management</li>
                                 </ul>
                             </div>
                         </div>
@@ -539,6 +575,40 @@
         <div class="bg-white p-6 rounded-2xl w-full max-w-2xl z-50 max-h-[80vh] overflow-y-auto">
             <h3 class="text-xl font-bold mb-4">Edit Expense</h3>
             <form id="edit-expense-form" class="space-y-4"></form>
+        </div>
+    </div>
+
+    <div id="payment-status-modal" class="fixed inset-0 items-center justify-center hidden z-50">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md z-50">
+            <h3 class="text-xl font-bold mb-4">Update Payment Status</h3>
+            <form id="payment-status-form" class="space-y-4">
+                <input type="hidden" id="payment-expense-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Payment Status</label>
+                    <select id="payment-status" class="form-input" required>
+                        <option value="pending">Pending</option>
+                        <option value="partial">Partial Paid</option>
+                        <option value="paid">Fully Paid</option>
+                    </select>
+                </div>
+                <div id="partial-amount-container" class="hidden">
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Amount Paid</label>
+                    <input type="number" id="paid-amount" class="form-input" step="0.01" placeholder="Enter paid amount">
+                </div>
+                <div class="flex gap-4 justify-end">
+                    <button type="button" class="btn bg-gray-200 cancel-payment-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="fixed inset-0 items-center justify-center hidden z-50">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white p-6 rounded-2xl w-full max-w-lg z-50 max-h-[80vh] overflow-y-auto">
+            <h3 class="text-xl font-bold mb-4">Edit User</h3>
+            <form id="edit-user-form" class="space-y-4"></form>
         </div>
     </div>
 
@@ -624,31 +694,35 @@
             }
         }
 
+        function showConfirmModal(title, message) {
+            return new Promise((resolve) => {
+                if (confirm(`${title}\n\n${message}`)) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        }
+
         // Page Navigation
         function switchPage(pageId) {
-            // Hide all pages
             document.querySelectorAll('.page-content').forEach(page => {
                 page.classList.remove('active');
             });
             
-            // Show selected page
             document.getElementById(pageId).classList.add('active');
             
-            // Update sidebar active state
             document.querySelectorAll('.sidebar-link').forEach(link => {
                 link.classList.remove('active');
             });
             document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
             
-            // Update page title
             const pageTitle = document.querySelector(`[data-page="${pageId}"] span`).textContent;
             elements.pageTitle.textContent = pageTitle;
             
-            // Close sidebar on mobile
             elements.sidebar.classList.add('-translate-x-full');
             elements.sidebarOverlay.classList.add('hidden');
             
-            // Load page-specific data
             loadPageData(pageId);
         }
 
@@ -730,7 +804,6 @@
                 setupQuickAddButtons();
             } catch (error) {
                 console.error("Error fetching users:", error);
-                // Fallback to demo data
                 initializeDemoUsers();
             }
         }
@@ -743,7 +816,9 @@
                     state.allExpensesCache = snapshot.docs.map(doc => ({ 
                         id: doc.id, 
                         ...doc.data(),
-                        createdAt: doc.data().createdAt || Timestamp.now()
+                        createdAt: doc.data().createdAt || Timestamp.now(),
+                        paymentStatus: doc.data().paymentStatus || 'pending',
+                        paidAmount: doc.data().paidAmount || 0
                     }));
                     
                     renderExpenseHistory();
@@ -758,16 +833,15 @@
                 });
             } catch (error) {
                 console.error("Error fetching expenses:", error);
-                // Fallback to demo data
                 initializeDemoExpenses();
             }
         }
 
         // Demo Data Fallback
         function initializeDemoUsers() {
-            state.allUsersCache.set('john', { id: 'john', name: 'John Doe', password: '123', role: 'User' });
-            state.allUsersCache.set('jane', { id: 'jane', name: 'Jane Smith', password: '123', role: 'User' });
-            state.allUsersCache.set('admin', { id: 'admin', name: 'Admin User', password: 'admin123', role: 'Admin' });
+            state.allUsersCache.set('john', { id: 'john', name: 'John Doe', password: '123', role: 'User', mobile: '9876543210', email: 'john@example.com', gender: 'Male' });
+            state.allUsersCache.set('jane', { id: 'jane', name: 'Jane Smith', password: '123', role: 'User', mobile: '9876543211', email: 'jane@example.com', gender: 'Female' });
+            state.allUsersCache.set('admin', { id: 'admin', name: 'Admin User', password: 'admin123', role: 'Admin', mobile: '9876543212', email: 'admin@example.com', gender: 'Male' });
             setupQuickAddButtons();
         }
 
@@ -783,7 +857,9 @@
                         { name: 'Jane Smith', amount: 1250 }
                     ],
                     addedBy: 'john',
-                    createdAt: Timestamp.fromDate(new Date('2024-01-15'))
+                    createdAt: Timestamp.fromDate(new Date('2024-01-15')),
+                    paymentStatus: 'pending',
+                    paidAmount: 0
                 },
                 {
                     id: '2',
@@ -795,7 +871,9 @@
                         { name: 'Jane Smith', amount: 600 }
                     ],
                     addedBy: 'jane',
-                    createdAt: Timestamp.fromDate(new Date('2024-01-14'))
+                    createdAt: Timestamp.fromDate(new Date('2024-01-14')),
+                    paymentStatus: 'partial',
+                    paidAmount: 600
                 }
             ];
             renderExpenseHistory();
@@ -813,13 +891,15 @@
             const isAdminLogin = document.getElementById('admin-checkbox').checked;
 
             try {
-                // Special admin account creation
                 if (username === "Shivshree@2004" && password === "Shiv@2004.") {
                     const userDocRef = doc(db, `/artifacts/${appId}/public/data/credentials`, username);
                     await setDoc(userDocRef, {
                         name: "Shivshree Kumar",
                         password: password,
-                        role: "Super Admin"
+                        role: "Super Admin",
+                        mobile: "",
+                        email: "",
+                        gender: ""
                     }, { merge: true });
                     
                     const adminDoc = await getDoc(userDocRef);
@@ -864,15 +944,12 @@
             elements.authContainer.classList.add('hidden');
             elements.dashboardContainer.classList.remove('hidden');
             
-            // Update user info
             elements.userDisplayName.textContent = state.currentUser.name;
             
-            // Show/hide admin features
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.classList.toggle('hidden', !state.isAdmin);
             });
             
-            // Initialize data
             await fetchAndCacheUsers();
             fetchAndDisplayExpenses();
             initializeExpenseForm();
@@ -893,19 +970,15 @@
             const addMemberBtn = document.getElementById('add-member-btn');
             const splitEquallyBtn = document.getElementById('split-equally-btn');
             
-            // Set today's date as default
             document.getElementById('expense-date').valueAsDate = new Date();
             
-            // Clear existing members and add current user as first member
             document.getElementById('members-container').innerHTML = '';
             if (state.currentUser && state.currentUser.name) {
                 addMember(state.currentUser.name);
             }
             
-            // Setup quick add buttons
             setupQuickAddButtons();
             
-            // Event listeners
             addMemberBtn.addEventListener('click', () => addMember());
             splitEquallyBtn.addEventListener('click', splitEqually);
             
@@ -916,7 +989,6 @@
             const container = document.getElementById('quick-add-container');
             container.innerHTML = '';
             
-            // Add other users as quick add options
             state.allUsersCache.forEach(user => {
                 if (user.id !== state.currentUser.id) {
                     const button = document.createElement('button');
@@ -939,7 +1011,6 @@
             const category = document.getElementById('category').value;
             const date = document.getElementById('expense-date').value;
             
-            // Validate members
             const memberRows = document.querySelectorAll('.member-row');
             const members = [];
             let totalSplit = 0;
@@ -957,7 +1028,6 @@
                 }
             });
             
-            // Validation
             if (members.length === 0) {
                 showToast('Please add at least one member', 'error');
                 return;
@@ -969,17 +1039,17 @@
             }
             
             try {
-                // Save to Firebase
                 await addDoc(collection(db, `/artifacts/${appId}/public/data/expenses`), {
                     description,
                     totalAmount,
                     category,
                     members,
                     addedBy: state.currentUser.id,
-                    createdAt: Timestamp.fromDate(new Date(date))
+                    createdAt: Timestamp.fromDate(new Date(date)),
+                    paymentStatus: 'pending',
+                    paidAmount: 0
                 });
                 
-                // Reset form
                 document.getElementById('expense-form').reset();
                 document.getElementById('members-container').innerHTML = '';
                 addMember(state.currentUser.name);
@@ -1009,16 +1079,43 @@
                     year: 'numeric' 
                 });
                 
+                const payerName = state.allUsersCache.get(expense.addedBy)?.name || expense.addedBy;
+                const statusClass = `expense-${expense.paymentStatus}`;
+                const statusText = expense.paymentStatus === 'paid' ? 'Paid' : 
+                                 expense.paymentStatus === 'partial' ? 'Partial Paid' : 'Pending';
+                const statusBadgeClass = `payment-status status-${expense.paymentStatus}`;
+                
+                let adminControls = '';
+                if (state.isAdmin) {
+                    adminControls = `
+                        <div class="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                            <button class="text-xs text-blue-500 hover:text-blue-700 update-payment-status" data-id="${expense.id}">
+                                <i class="fas fa-edit mr-1"></i>Payment Status
+                            </button>
+                            <button class="text-xs text-red-500 hover:text-red-700 delete-expense" data-id="${expense.id}">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                let paymentInfo = '';
+                if (expense.paymentStatus === 'partial') {
+                    paymentInfo = `<div class="text-xs text-orange-600 mt-1">Paid: ₹${expense.paidAmount.toFixed(2)} / ₹${expense.totalAmount.toFixed(2)}</div>`;
+                }
+                
                 return `
-                    <div class="card p-4 expense-item">
+                    <div class="card p-4 expense-item ${statusClass}">
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <h3 class="font-semibold text-lg text-gray-800">${expense.description}</h3>
                                 <p class="text-gray-500 text-sm">${formattedDate} • ${expense.category}</p>
+                                <span class="${statusBadgeClass}">${statusText}</span>
+                                ${paymentInfo}
                             </div>
                             <div class="text-right">
                                 <p class="font-bold text-xl text-purple-600">₹${expense.totalAmount.toFixed(2)}</p>
-                                <p class="text-gray-500 text-sm">by ${state.allUsersCache.get(expense.addedBy)?.name || expense.addedBy}</p>
+                                <p class="text-gray-500 text-sm">by ${payerName}</p>
                             </div>
                         </div>
                         <div class="border-t pt-3">
@@ -1029,9 +1126,79 @@
                                 </div>
                             `).join('')}
                         </div>
+                        ${adminControls}
                     </div>
                 `;
             }).join('');
+            
+            // Add event listeners for admin controls
+            if (state.isAdmin) {
+                document.querySelectorAll('.update-payment-status').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const expenseId = e.target.closest('button').dataset.id;
+                        openPaymentStatusModal(expenseId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-expense').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const expenseId = e.target.closest('button').dataset.id;
+                        const expense = state.allExpensesCache.find(exp => exp.id === expenseId);
+                        if (expense && await showConfirmModal('Delete Expense', `Are you sure you want to delete "${expense.description}"?`)) {
+                            try {
+                                await deleteDoc(doc(db, `/artifacts/${appId}/public/data/expenses`, expenseId));
+                                showToast('Expense deleted successfully', 'success');
+                            } catch (error) {
+                                showToast('Failed to delete expense', 'error');
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        // Payment Status Management
+        function openPaymentStatusModal(expenseId) {
+            const expense = state.allExpensesCache.find(exp => exp.id === expenseId);
+            if (!expense) return;
+            
+            document.getElementById('payment-expense-id').value = expenseId;
+            document.getElementById('payment-status').value = expense.paymentStatus;
+            document.getElementById('paid-amount').value = expense.paidAmount || 0;
+            
+            togglePartialAmountVisibility(expense.paymentStatus);
+            
+            document.getElementById('payment-status-modal').classList.remove('hidden');
+            document.getElementById('payment-status-modal').classList.add('flex');
+        }
+
+        function togglePartialAmountVisibility(status) {
+            const container = document.getElementById('partial-amount-container');
+            if (status === 'partial') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        async function handlePaymentStatusUpdate(e) {
+            e.preventDefault();
+            
+            const expenseId = document.getElementById('payment-expense-id').value;
+            const status = document.getElementById('payment-status').value;
+            const paidAmount = parseFloat(document.getElementById('paid-amount').value) || 0;
+            
+            try {
+                await updateDoc(doc(db, `/artifacts/${appId}/public/data/expenses`, expenseId), {
+                    paymentStatus: status,
+                    paidAmount: paidAmount
+                });
+                
+                document.getElementById('payment-status-modal').classList.add('hidden');
+                showToast('Payment status updated successfully', 'success');
+            } catch (error) {
+                showToast('Failed to update payment status', 'error');
+            }
         }
 
         // Settlements Calculation
@@ -1045,19 +1212,16 @@
                 return;
             }
             
-            // Calculate balances
             const balances = {};
             const totalPaid = {};
             const totalShare = {};
             
-            // Initialize balances for all users
             state.allUsersCache.forEach(user => {
                 balances[user.name] = 0;
                 totalPaid[user.name] = 0;
                 totalShare[user.name] = 0;
             });
             
-            // Calculate totals
             state.allExpensesCache.forEach(expense => {
                 const payer = state.allUsersCache.get(expense.addedBy);
                 if (payer) {
@@ -1069,12 +1233,10 @@
                 });
             });
             
-            // Calculate final balances
             state.allUsersCache.forEach(user => {
                 balances[user.name] = (totalPaid[user.name] || 0) - (totalShare[user.name] || 0);
             });
             
-            // Display balance summary
             balancesContainer.innerHTML = '';
             state.allUsersCache.forEach(user => {
                 const balance = balances[user.name];
@@ -1102,7 +1264,6 @@
                 balancesContainer.appendChild(card);
             });
             
-            // Calculate settlements
             const debtors = [];
             const creditors = [];
             
@@ -1137,7 +1298,6 @@
                 if (creditor.amount < 0.01) creditors.shift();
             }
             
-            // Display settlements
             if (settlements.length === 0) {
                 settlementsContainer.innerHTML = '<p class="text-center text-green-600 font-semibold py-4">All settled up! No payments needed.</p>';
             } else {
@@ -1166,17 +1326,14 @@
                 return;
             }
             
-            // Calculate total expense
             const totalExpense = state.allExpensesCache.reduce((sum, expense) => sum + expense.totalAmount, 0);
             
-            // Calculate expenses by category
             const expensesByCategory = {};
             state.allExpensesCache.forEach(expense => {
                 const category = expense.category || 'Other';
                 expensesByCategory[category] = (expensesByCategory[category] || 0) + expense.totalAmount;
             });
             
-            // Calculate paid by each person
             const paidBy = {};
             state.allExpensesCache.forEach(expense => {
                 const payer = state.allUsersCache.get(expense.addedBy);
@@ -1185,7 +1342,12 @@
                 }
             });
             
-            // Display summary
+            // Payment status stats
+            const paymentStats = { pending: 0, partial: 0, paid: 0 };
+            state.allExpensesCache.forEach(expense => {
+                paymentStats[expense.paymentStatus]++;
+            });
+            
             statsSummary.innerHTML = `
                 <div class="stat-card">
                     <p class="text-sm opacity-80">Total Spent</p>
@@ -1195,9 +1357,16 @@
                     <p class="text-sm opacity-80">Total Expenses</p>
                     <p class="text-3xl font-bold mt-2">${state.allExpensesCache.length}</p>
                 </div>
+                <div class="stat-card">
+                    <p class="text-sm opacity-80">Pending Payments</p>
+                    <p class="text-3xl font-bold mt-2">${paymentStats.pending}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="text-sm opacity-80">Completed Payments</p>
+                    <p class="text-3xl font-bold mt-2">${paymentStats.paid}</p>
+                </div>
             `;
             
-            // Create charts
             createCharts(expensesByCategory, paidBy);
         }
 
@@ -1205,11 +1374,9 @@
             const categoryCtx = document.getElementById('category-chart').getContext('2d');
             const paidByCtx = document.getElementById('paid-by-chart').getContext('2d');
             
-            // Destroy existing charts
             if (categoryChartInstance) categoryChartInstance.destroy();
             if (paidByChartInstance) paidByChartInstance.destroy();
             
-            // Category chart
             categoryChartInstance = new Chart(categoryCtx, {
                 type: 'doughnut',
                 data: {
@@ -1231,7 +1398,6 @@
                 }
             });
             
-            // Paid by chart
             paidByChartInstance = new Chart(paidByCtx, {
                 type: 'bar',
                 data: {
@@ -1338,21 +1504,115 @@
                             <div>
                                 <h4 class="font-semibold">${user.name}</h4>
                                 <p class="text-sm text-gray-500">Username: ${user.id}</p>
-                                <p class="text-sm text-gray-500">${user.mobile || 'No mobile'} • ${user.email || 'No email'}</p>
+                                <p class="text-sm text-gray-500">${user.mobile || 'No mobile'} • ${user.email || 'No email'} • ${user.gender || 'Not specified'}</p>
                             </div>
                             <div class="flex gap-2">
-                                <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm edit-user" data-username="${user.id}">Edit</button>
-                                <button class="px-3 py-1 bg-red-500 text-white rounded text-sm delete-user" data-username="${user.id}">Delete</button>
+                                <button class="px-3 py-1 bg-blue-500 text-white rounded text-sm edit-user" data-username="${user.id}">
+                                    <i class="fas fa-edit mr-1"></i>Edit
+                                </button>
+                                <button class="px-3 py-1 bg-red-500 text-white rounded text-sm delete-user" data-username="${user.id}">
+                                    <i class="fas fa-trash mr-1"></i>Delete
+                                </button>
                             </div>
                         </div>
                     `;
                     container.appendChild(userCard);
                 }
             });
+            
+            // Add event listeners for user management
+            document.querySelectorAll('.edit-user').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const username = e.target.closest('button').dataset.username;
+                    openEditUserModal(username);
+                });
+            });
+            
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const username = e.target.closest('button').dataset.username;
+                    const user = state.allUsersCache.get(username);
+                    if (user && await showConfirmModal('Delete User', `Are you sure you want to delete user "${user.name}"?`)) {
+                        try {
+                            await deleteDoc(doc(db, `/artifacts/${appId}/public/data/credentials`, username));
+                            showToast('User deleted successfully', 'success');
+                        } catch (error) {
+                            showToast('Failed to delete user', 'error');
+                        }
+                    }
+                });
+            });
+        }
+
+        function openEditUserModal(username) {
+            const user = state.allUsersCache.get(username);
+            if (!user) return;
+            
+            const form = document.getElementById('edit-user-form');
+            form.innerHTML = `
+                <input type="hidden" id="edit-username" value="${user.id}">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Full Name</label>
+                    <input type="text" id="edit-full-name" class="form-input" value="${user.name || ''}" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Password (leave blank to keep current)</label>
+                    <input type="password" id="edit-password" class="form-input" placeholder="New password">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Mobile</label>
+                    <input type="tel" id="edit-mobile" class="form-input" value="${user.mobile || ''}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Email</label>
+                    <input type="email" id="edit-email" class="form-input" value="${user.email || ''}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Gender</label>
+                    <select id="edit-gender" class="form-input">
+                        <option value="">Select</option>
+                        <option value="Male" ${user.gender === 'Male' ? 'selected' : ''}>Male</option>
+                        <option value="Female" ${user.gender === 'Female' ? 'selected' : ''}>Female</option>
+                        <option value="Other" ${user.gender === 'Other' ? 'selected' : ''}>Other</option>
+                    </select>
+                </div>
+                <div class="flex gap-4 justify-end">
+                    <button type="button" class="btn bg-gray-200 cancel-edit-user">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            `;
+            
+            document.getElementById('edit-user-modal').classList.remove('hidden');
+            document.getElementById('edit-user-modal').classList.add('flex');
+        }
+
+        async function handleEditUserSubmit(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('edit-username').value;
+            const updates = {
+                name: document.getElementById('edit-full-name').value,
+                mobile: document.getElementById('edit-mobile').value,
+                email: document.getElementById('edit-email').value,
+                gender: document.getElementById('edit-gender').value
+            };
+            
+            const newPassword = document.getElementById('edit-password').value;
+            if (newPassword) {
+                updates.password = newPassword;
+            }
+            
+            try {
+                await updateDoc(doc(db, `/artifacts/${appId}/public/data/credentials`, username), updates);
+                document.getElementById('edit-user-modal').classList.add('hidden');
+                showToast('User updated successfully!', 'success');
+                fetchAndDisplayUsersForAdmin();
+            } catch (error) {
+                showToast('Failed to update user', 'error');
+            }
         }
 
         async function fetchAndDisplayMessages() {
-            // This would fetch messages from Firebase
             const container = document.getElementById('messages-container');
             container.innerHTML = '<p class="text-gray-500 text-center">No messages yet</p>';
         }
@@ -1365,10 +1625,8 @@
 
         // Event Listeners
         function initializeEventListeners() {
-            // Auth form
             elements.authForm.addEventListener('submit', handleLogin);
             
-            // Password toggle
             document.getElementById('toggle-password').addEventListener('click', function() {
                 const passwordInput = document.getElementById('password');
                 const type = passwordInput.type === 'password' ? 'text' : 'password';
@@ -1376,14 +1634,12 @@
                 this.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             });
             
-            // Admin checkbox
             document.getElementById('admin-checkbox').addEventListener('change', function() {
                 const loginBtn = document.getElementById('login-btn');
                 const text = this.checked ? 'Login as Admin' : 'Login as User';
                 loginBtn.querySelector('span').textContent = text;
             });
             
-            // Sidebar navigation
             document.querySelectorAll('.sidebar-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -1392,22 +1648,18 @@
                 });
             });
             
-            // Mobile menu toggle
             elements.menuToggleBtn.addEventListener('click', () => {
                 elements.sidebar.classList.toggle('-translate-x-full');
                 elements.sidebarOverlay.classList.toggle('hidden');
             });
             
-            // Sidebar overlay
             elements.sidebarOverlay.addEventListener('click', () => {
                 elements.sidebar.classList.add('-translate-x-full');
                 elements.sidebarOverlay.classList.add('hidden');
             });
             
-            // Logout
             elements.logoutBtn.addEventListener('click', showLoginScreen);
             
-            // History search
             document.getElementById('history-search').addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
                 const expenseItems = document.querySelectorAll('.expense-item');
@@ -1416,6 +1668,85 @@
                     const text = item.textContent.toLowerCase();
                     item.style.display = text.includes(searchTerm) ? 'block' : 'none';
                 });
+            });
+            
+            // Payment status modal events
+            document.getElementById('payment-status').addEventListener('change', function() {
+                togglePartialAmountVisibility(this.value);
+            });
+            
+            document.getElementById('payment-status-form').addEventListener('submit', handlePaymentStatusUpdate);
+            
+            document.querySelectorAll('.cancel-payment-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('payment-status-modal').classList.add('hidden');
+                });
+            });
+            
+            // Edit user modal events
+            document.getElementById('edit-user-form').addEventListener('submit', handleEditUserSubmit);
+            
+            document.querySelectorAll('.cancel-edit-user').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('edit-user-modal').classList.add('hidden');
+                });
+            });
+            
+            // Add user form
+            document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('new-username').value;
+                const password = document.getElementById('new-password').value;
+                const name = document.getElementById('new-full-name').value;
+                const mobile = document.getElementById('new-mobile').value;
+                const email = document.getElementById('new-email').value;
+                const gender = document.getElementById('new-gender').value;
+                
+                if (state.allUsersCache.has(username)) {
+                    showToast('Username already exists', 'error');
+                    return;
+                }
+                
+                try {
+                    await setDoc(doc(db, `/artifacts/${appId}/public/data/credentials`, username), {
+                        name,
+                        password,
+                        mobile,
+                        email,
+                        gender,
+                        role: 'User'
+                    });
+                    
+                    document.getElementById('add-user-form').reset();
+                    showToast('User added successfully!', 'success');
+                    fetchAndDisplayUsersForAdmin();
+                } catch (error) {
+                    showToast('Failed to add user', 'error');
+                }
+            });
+            
+            // Contact form
+            document.getElementById('contact-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('contact-name').value;
+                const email = document.getElementById('contact-email').value;
+                const message = document.getElementById('contact-message').value;
+                
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/public/data/messages`), {
+                        name,
+                        email,
+                        message,
+                        sentAt: Timestamp.now()
+                    });
+                    
+                    document.getElementById('contact-message').value = '';
+                    showToast('Message sent successfully!', 'success');
+                } catch (error) {
+                    showToast('Failed to send message', 'error');
+                }
             });
         }
 
